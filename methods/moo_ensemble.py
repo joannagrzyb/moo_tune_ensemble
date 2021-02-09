@@ -19,7 +19,7 @@ from methods.optimization_param import OptimizationParam
 
 class MooEnsembleSVC(BaseEstimator):
 
-    def __init__(self, base_classifier, number_of_classifiers=10, test_size=0.5, pareto_decision='all', objectives=2, p_size=100):
+    def __init__(self, base_classifier, scale_features=0.5, number_of_classifiers=10, test_size=0.5, pareto_decision='all', objectives=2, p_size=100):
 
         self.base_classifier = base_classifier
         self.number_of_classifiers = number_of_classifiers
@@ -36,39 +36,39 @@ class MooEnsembleSVC(BaseEstimator):
         self.hyperparameters = None
         self.pareto_decision = pareto_decision
         self.ensemble = []
+        self.scale_features = scale_features
 
     def partial_fit(self, X, y, classes=None):
+        n_features = X.shape[1]
 
         # Mixed variable problem optimization
-        mask = ["real", "real", "binary", ""]   # binary tyle ile cech? ale nie wiem czy to bedzie dobrze
-
-        # sampling = MixedVariableSampling(mask, {
-        #     "real": get_sampling("real_random"),
-        #     "int": get_sampling("int_random")
-        # })
-        #
-        # crossover = MixedVariableCrossover(mask, {
-        #     "real": get_crossover("real_sbx", prob=1.0, eta=3.0),
-        #     "int": get_crossover("int_sbx", prob=1.0, eta=3.0)
-        # })
-        #
-        # mutation = MixedVariableMutation(mask, {
-        #     "real": get_mutation("real_pm", eta=3.0),
-        #     "int": get_mutation("int_pm", eta=3.0)
-        # })
+        mask = ["real", "real"]
+        mask.extend(["binary"] * n_features)
+        sampling = MixedVariableSampling(mask, {
+            "real": get_sampling("real_random"),
+            "binary": get_sampling("bin_random")
+        })
+        crossover = MixedVariableCrossover(mask, {
+            "real": get_crossover("real_two_point"),
+            "binary": get_crossover("bin_two_point")
+        })
+        mutation = MixedVariableMutation(mask, {
+            "real": get_mutation("real_pm"),
+            "binary": get_mutation("bin_bitflip")
+        })
 
         # Check classes
         self.classes_ = classes
         if self.classes_ is None:
             self.classes_, _ = np.unique(y, return_inverse=True)
 
-        problem = OptimizationParam(X, y, self.test_size, self.base_classifier, self.objectives)
+        problem = OptimizationParam(X, y, test_size=self.test_size, estimator=self.base_classifier, scale_features=self.scale_features, n_features=n_features, objectives=self.objectives)
 
         algorithm = NSGA2(
                        pop_size=self.p_size,
-                       sampling=get_sampling("real_random"),
-                       crossover=get_crossover("real_two_point"),
-                       mutation=get_mutation("real_pm"),
+                       sampling=sampling,
+                       crossover=crossover,
+                       mutation=mutation,
                        eliminate_duplicates=True)
 
         res = minimize(
@@ -79,11 +79,18 @@ class MooEnsembleSVC(BaseEstimator):
                        verbose=False,
                        save_history=True)
 
+        print(res.algorithm)
+        print(res.G)
+        print(res.CV)
+        print(res.pf)
+
         # Select solution from the Pareto front
         # F returns all solutions in form [-precision, -recall]
         self.solutions = res.F
+        print("X", res.X)
+        print("F", self.solutions)
 
-        # X returns values of hyperparameter C and gamma
+        # X returns values of hyperparameter C, gamma and binary vector of selected features
         if self.pareto_decision == 'precision':
             index = np.argmin(self.solutions[:, 0], axis=0)
             self.hyperparameters = res.X[index]

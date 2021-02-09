@@ -26,7 +26,7 @@ clfs = {
     # "MLPC": MLPClassifier(hidden_layer_sizes=(10))
 }
 
-stream = sl.streams.StreamGenerator(n_chunks=10, chunk_size=500, n_features=2, n_informative=2, n_redundant=0, y_flip=0.05, n_drifts=0, weights=[0.8, 0.2], random_state=1111)
+stream = sl.streams.StreamGenerator(n_chunks=10, chunk_size=500, n_features=5, n_informative=2, n_redundant=3, y_flip=0.05, n_drifts=0, weights=[0.8, 0.2], random_state=1111)
 
 
 
