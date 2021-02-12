@@ -6,7 +6,7 @@ from sklearn.base import clone
 from pymoo.model.problem import Problem
 
 
-class OptimizationParam(Problem):
+class OptimizationParamAll(Problem):
     def __init__(self, X, y, test_size, estimator, scale_features, n_features, n_param=2, objectives=2, random_state=0, feature_names=None):
 
         self.estimator = estimator

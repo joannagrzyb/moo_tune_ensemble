@@ -7,10 +7,10 @@ from pymoo.optimize import minimize
 from pymoo.factory import get_sampling, get_crossover, get_mutation
 from pymoo.operators.mixed_variable_operator import MixedVariableSampling, MixedVariableMutation, MixedVariableCrossover
 
-from methods.optimization_param import OptimizationParam
+from methods.optimization_param_all import OptimizationParamAll
 
 
-class MooEnsembleSVC(BaseEstimator):
+class MooEnsembleAllSVC(BaseEstimator):
 
     def __init__(self, base_classifier, scale_features=0.5, n_classifiers=10, test_size=0.5, objectives=2, p_size=100):
 
@@ -51,7 +51,7 @@ class MooEnsembleSVC(BaseEstimator):
         })
 
         # Create optimization problem
-        problem = OptimizationParam(X, y, test_size=self.test_size, estimator=self.base_classifier, scale_features=self.scale_features, n_features=n_features, objectives=self.objectives)
+        problem = OptimizationParamAll(X, y, test_size=self.test_size, estimator=self.base_classifier, scale_features=self.scale_features, n_features=n_features, objectives=self.objectives)
 
         algorithm = NSGA2(
                        pop_size=self.p_size,
