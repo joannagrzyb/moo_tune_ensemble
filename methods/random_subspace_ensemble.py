@@ -29,19 +29,22 @@ class RandomSubspaceEnsemble(BaseEstimator):
         self.ensemble.append(candidate)
 
         # Pruning based on balanced_accuracy_score
-        ensemble_size = len(self.ensemble)
-        if ensemble_size > self.n_classifiers:
-            bac_array = []
-            for clf_id, clf in enumerate(self.ensemble):
-                y_pred = clf.predict(X[:, self.selected_features[clf_id]])
-                bac = sl.metrics.balanced_accuracy_score(y, y_pred)
-                bac_array.append(bac)
-            bac_arg_sorted = np.argsort(bac_array)
-            self.ensemble_arr = np.array(self.ensemble)
-            self.ensemble_arr = self.ensemble_arr[bac_arg_sorted[(len(bac_array)-self.n_classifiers):]]
-            self.ensemble = self.ensemble_arr.tolist()
+        # ensemble_size = len(self.ensemble)
+        # if ensemble_size > self.n_classifiers:
+        #     bac_array = []
+        #     for clf_id, clf in enumerate(self.ensemble):
+        #         y_pred = clf.predict(X[:, self.selected_features[clf_id]])
+        #         bac = sl.metrics.balanced_accuracy_score(y, y_pred)
+        #         bac_array.append(bac)
+        #     bac_arg_sorted = np.argsort(bac_array)
+        #     self.ensemble_arr = np.array(self.ensemble)
+        #     self.ensemble_arr = self.ensemble_arr[bac_arg_sorted[(len(bac_array)-self.n_classifiers):]]
+        #     self.ensemble = self.ensemble_arr.tolist()
 
         return self
+
+    def fit(self, X, y, classes=None):
+        self.partial_fit(X, y, classes)
 
     def ensemble_support_matrix(self, X):
         # Ensemble support matrix

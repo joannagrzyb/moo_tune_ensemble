@@ -63,7 +63,7 @@ class MooEnsembleSVC(BaseEstimator):
         res = minimize(
                        problem,
                        algorithm,
-                       ('n_eval', 100),
+                       ('n_eval', 1000),
                        # sprawdź n_gen 100 lub 1000
                        seed=1,
                        verbose=False,
@@ -73,8 +73,8 @@ class MooEnsembleSVC(BaseEstimator):
         self.solutions = res.F
 
         # X returns values of hyperparameter C, gamma and binary vector of selected features
-        print("X", res.X)
-        print("F", self.solutions)
+        # print("X", res.X)
+        # print("F", self.solutions)
         for result_opt in res.X:
             self.base_classifier = self.base_classifier.set_params(C=result_opt[0], gamma=result_opt[1])
             sf = result_opt[2:].tolist()
@@ -85,19 +85,22 @@ class MooEnsembleSVC(BaseEstimator):
             self.ensemble.append(candidate)
 
         # Pruning based on balanced_accuracy_score
-        ensemble_size = len(self.ensemble)
-        if ensemble_size > self.n_classifiers:
-            bac_array = []
-            for clf_id, clf in enumerate(self.ensemble):
-                y_pred = clf.predict(X[:, self.selected_features[clf_id]])
-                bac = sl.metrics.balanced_accuracy_score(y, y_pred)
-                bac_array.append(bac)
-            bac_arg_sorted = np.argsort(bac_array)
-            self.ensemble_arr = np.array(self.ensemble)
-            self.ensemble_arr = self.ensemble_arr[bac_arg_sorted[(len(bac_array)-self.n_classifiers):]]
-            self.ensemble = self.ensemble_arr.tolist()
+        # ensemble_size = len(self.ensemble)
+        # if ensemble_size > self.n_classifiers:
+        #     bac_array = []
+        #     for clf_id, clf in enumerate(self.ensemble):
+        #         y_pred = clf.predict(X[:, self.selected_features[clf_id]])
+        #         bac = sl.metrics.balanced_accuracy_score(y, y_pred)
+        #         bac_array.append(bac)
+        #     bac_arg_sorted = np.argsort(bac_array)
+        #     self.ensemble_arr = np.array(self.ensemble)
+        #     self.ensemble_arr = self.ensemble_arr[bac_arg_sorted[(len(bac_array)-self.n_classifiers):]]
+        #     self.ensemble = self.ensemble_arr.tolist()
 
         return self
+
+    def fit(self, X, y, classes=None):
+        self.partial_fit(X, y, classes)
 
     def ensemble_support_matrix(self, X):
         # Ensemble support matrix
