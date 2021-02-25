@@ -1,6 +1,8 @@
 import numpy as np
 import strlearn as sl
 from sklearn.base import BaseEstimator, clone
+from sklearn.metrics import accuracy_score
+from scipy.stats import mode
 
 from pymoo.algorithms.nsga2 import NSGA2
 from pymoo.optimize import minimize
@@ -8,11 +10,12 @@ from pymoo.factory import get_sampling, get_crossover, get_mutation
 from pymoo.operators.mixed_variable_operator import MixedVariableSampling, MixedVariableMutation, MixedVariableCrossover
 
 from methods.optimization_param import OptimizationParam
+from utils.diversity import calc_diversity_measures, calc_diversity_measures2
 
 
 class MooEnsembleSVC(BaseEstimator):
 
-    def __init__(self, base_classifier, scale_features=0.5, n_classifiers=10, test_size=0.5, objectives=2, p_size=100):
+    def __init__(self, base_classifier, scale_features=0.5, n_classifiers=10, test_size=0.5, objectives=2, p_size=100, predict_decision="ASV"):
 
         self.base_classifier = base_classifier
         self.n_classifiers = n_classifiers
@@ -23,12 +26,14 @@ class MooEnsembleSVC(BaseEstimator):
         self.ensemble = []
         self.scale_features = scale_features
         self.selected_features = []
+        self.predict_decision = predict_decision
 
     def partial_fit(self, X, y, classes=None):
+        self.X, self.y = X, y
         # Check classes
         self.classes_ = classes
         if self.classes_ is None:
-            self.classes_, _ = np.unique(y, return_inverse=True)
+            self.classes_, _ = np.unique(self.y, return_inverse=True)
 
         n_features = X.shape[1]
 
@@ -84,18 +89,20 @@ class MooEnsembleSVC(BaseEstimator):
             # Add candidate to the ensemble
             self.ensemble.append(candidate)
 
+        """
         # Pruning based on balanced_accuracy_score
-        # ensemble_size = len(self.ensemble)
-        # if ensemble_size > self.n_classifiers:
-        #     bac_array = []
-        #     for clf_id, clf in enumerate(self.ensemble):
-        #         y_pred = clf.predict(X[:, self.selected_features[clf_id]])
-        #         bac = sl.metrics.balanced_accuracy_score(y, y_pred)
-        #         bac_array.append(bac)
-        #     bac_arg_sorted = np.argsort(bac_array)
-        #     self.ensemble_arr = np.array(self.ensemble)
-        #     self.ensemble_arr = self.ensemble_arr[bac_arg_sorted[(len(bac_array)-self.n_classifiers):]]
-        #     self.ensemble = self.ensemble_arr.tolist()
+        ensemble_size = len(self.ensemble)
+        if ensemble_size > self.n_classifiers:
+            bac_array = []
+            for clf_id, clf in enumerate(self.ensemble):
+                y_pred = clf.predict(X[:, self.selected_features[clf_id]])
+                bac = sl.metrics.balanced_accuracy_score(y, y_pred)
+                bac_array.append(bac)
+            bac_arg_sorted = np.argsort(bac_array)
+            self.ensemble_arr = np.array(self.ensemble)
+            self.ensemble_arr = self.ensemble_arr[bac_arg_sorted[(len(bac_array)-self.n_classifiers):]]
+            self.ensemble = self.ensemble_arr.tolist()
+        """
 
         return self
 
@@ -107,13 +114,41 @@ class MooEnsembleSVC(BaseEstimator):
         return np.array([member_clf.predict_proba(X[:, sf]) for member_clf, sf in zip(self.ensemble, self.selected_features)])
 
     def predict(self, X):
-        # Prediction based on the average support vectors
-        ens_sup_matrix = self.ensemble_support_matrix(X)
-        average_support = np.mean(ens_sup_matrix, axis=0)
-        prediction = np.argmax(average_support, axis=1)
-        # Return prediction
-        return self.classes_[prediction]
+        # Prediction based on the Average Support Vectors
+        if self.predict_decision == "ASV":
+            ens_sup_matrix = self.ensemble_support_matrix(X)
+            average_support = np.mean(ens_sup_matrix, axis=0)
+            prediction = np.argmax(average_support, axis=1)
+        # Prediction based on the Majority Voting
+        elif self.predict_decision == "MV":
+            predictions = np.array([member_clf.predict(X) for member_clf in self.ensemble_])
+            prediction = np.squeeze(mode(predictions, axis=0)[0])
+        return prediction
 
     def predict_proba(self, X):
         probas_ = [clf.predict_proba(X) for clf in self.ensemble]
         return np.average(probas_, axis=0)
+
+    def calculate_diversity(self):
+        if len(self.ensemble) > 1:
+            # All measures for whole ensemble
+            self.entropy_measure_e, self.k0, self.kw, self.disagreement_measure, self.q_statistic_mean = calc_diversity_measures(self.X, self.y, self.ensemble, self.selected_features, p=0.01)
+            # entropy_measure_e: E varies between 0 and 1, where 0 indicates no difference and 1 indicates the highest possible diversity.
+            # kw - Kohavi-Wolpert variance
+            # Q-statistic: <-1, 1>
+            # Q = 0 statistically independent classifiers
+            # Q < 0 classifiers commit errors on different objects
+            # Q > 0 classifiers recognize the same objects correctly
+
+            return(self.entropy_measure_e, self.kw, self.disagreement_measure, self.q_statistic_mean)
+
+            """
+            # k - measurement of interrater agreement
+            self.kkk = []
+            for sf in self.selected_features:
+                # Calculate mean accuracy on training set
+                p = np.mean(np.array([accuracy_score(self.y, member_clf.predict(self.X[:, sf])) for clf_id, member_clf in enumerate(self.ensemble)]))
+                self.k = calc_diversity_measures2(self.X, self.y, self.ensemble, self.selected_features, p, measure="k")
+                self.kkk.append(self.k)
+            return self.kkk
+            """

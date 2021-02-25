@@ -8,7 +8,7 @@ import os
 from methods.moo_ensemble import MooEnsembleSVC
 # from methods.moo_ensemble_all import MooEnsembleAllSVC
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
-from load_dataset import load_data, find_datasets
+from utils.load_dataset import load_data, find_datasets
 from sklearn.model_selection import RepeatedStratifiedKFold
 from sklearn.base import clone
 from sklearn.preprocessing import MinMaxScaler
@@ -57,6 +57,7 @@ metrics = [sl.metrics.balanced_accuracy_score, sl.metrics.geometric_mean_score_1
 metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "Precision"]
 
 for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
+    start_ds = time.time()
     print("Dataset: ", dataset_id, dataset)
     # dataset_path = "datasets/9higher_part1/" + dataset + ".dat"
     dataset_path = "datasets/1_5_9/" + dataset + ".dat"
@@ -67,6 +68,7 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
     # X = MinMaxScaler().fit_transform(X, y)
 
     scores = np.zeros((len(metrics), len(methods), n_folds))
+    diversity = np.zeros((len(methods), n_folds, 4))
 
     for fold_id, (train, test) in enumerate(rskf.split(X, y)):
         X_train, X_test = X[train], X[test]
@@ -79,6 +81,14 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
             for metric_id, metric in enumerate(metrics):
                 scores[metric_id, clf_id, fold_id] = metric(y_test, y_pred)
                 print(metric(y_test, y_pred))
+            # tu zmienić jakoś ten warunek, żeby nie mając tej funkcji w metodzie nie liczyło i nie zapisywało żadnych wyników
+            calculate_diversity = getattr(clf, "calculate_diversity", None)
+            if callable(calculate_diversity):
+                diversity[clf_id, fold_id] = clf.calculate_diversity()
+                # print(diversity[clf_id, fold_id])
+            else:
+                diversity[clf_id, fold_id] = None
+                # print(clf_name, diversity[clf_id, fold_id])
     print(scores)
     # # Save results to csv - 9higher_part1
     # for clf_id, clf_name in enumerate(methods):
@@ -96,8 +106,13 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
                 os.makedirs("results/experiment1/1_5_9/raw_results/%s/%s/" % (metric, dataset))
             np.savetxt(fname=filename, fmt="%f", X=scores[metric_id, clf_id, :])
 
-    end = time.time()
-    print("TIME: %.0f sec" % (end - start))
+        filename = "results/experiment1/1_5_9/diversity_results/%s/%s.csv" % (dataset, clf_name)
+        if not os.path.exists("results/experiment1/1_5_9/diversity_results/%s/" % (dataset)):
+            os.makedirs("results/experiment1/1_5_9/diversity_results/%s/" % (dataset))
+        np.savetxt(fname=filename, fmt="%f", X=diversity[clf_id, :, :])
+
+    end_ds = time.time()
+    print("TIME: %.0f sec" % (end_ds - start_ds))
 
 end = time.time()
 print("TIME: %.0f sec" % (end - start))

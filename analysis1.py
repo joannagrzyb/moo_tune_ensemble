@@ -7,7 +7,7 @@ from sklearn.svm import SVC
 from methods.moo_ensemble import MooEnsembleSVC
 # from methods.moo_ensemble_all import MooEnsembleAllSVC
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
-from load_dataset import find_datasets
+from utils.load_dataset import find_datasets
 
 
 # DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datasets/9higher_part1')
