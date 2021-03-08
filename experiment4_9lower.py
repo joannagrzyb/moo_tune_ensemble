@@ -92,6 +92,7 @@ def compute(dataset_id, dataset):
 
         end = time.time() - start
         logging.info("DONE - %s (Time: %d [s])" % (dataset, end))
+        print("DONE - %s (Time: %d [s])" % (dataset, end))
 
     except Exception as ex:
         logging.exception("Exception in %s" % (dataset))

@@ -39,14 +39,14 @@ DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datase
 metrics = [sl.metrics.balanced_accuracy_score, sl.metrics.geometric_mean_score_1, sl.metrics.geometric_mean_score_2, sl.metrics.f1_score, sl.metrics.recall, sl.metrics.specificity, sl.metrics.precision]
 metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "Precision"]
 
-logging.basicConfig(filename='experiment4_9higher_part1.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
+logging.basicConfig(filename='experiment1_9higher_part1.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
 logging.info("--------------------------------------------------------------------------------")
 logging.info("-------                        NEW EXPERIMENT                            -------")
 logging.info("--------------------------------------------------------------------------------")
 
 
 def compute(dataset_id, dataset):
-    logging.basicConfig(filename='experiment4_9higher_part1.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
+    logging.basicConfig(filename='experiment1_9higher_part1.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
     try:
         warnings.filterwarnings("ignore")
         print("START: %s" % (dataset))
@@ -80,18 +80,19 @@ def compute(dataset_id, dataset):
         for clf_id, clf_name in enumerate(methods):
             for metric_id, metric in enumerate(metrics_alias):
                 # Save metric results
-                filename = "results/experiment4_9higher_part1/raw_results/%s/%s/%s.csv" % (metric, dataset, clf_name)
-                if not os.path.exists("results/experiment4_9higher_part1/raw_results/%s/%s/" % (metric, dataset)):
-                    os.makedirs("results/experiment4_9higher_part1/raw_results/%s/%s/" % (metric, dataset))
+                filename = "results/experiment1_9higher_part1/raw_results/%s/%s/%s.csv" % (metric, dataset, clf_name)
+                if not os.path.exists("results/experiment1_9higher_part1/raw_results/%s/%s/" % (metric, dataset)):
+                    os.makedirs("results/experiment1_9higher_part1/raw_results/%s/%s/" % (metric, dataset))
                 np.savetxt(fname=filename, fmt="%f", X=scores[metric_id, clf_id, :])
             # Save diversity results
-            filename = "results/experiment4_9higher_part1/diversity_results/%s/%s.csv" % (dataset, clf_name)
-            if not os.path.exists("results/experiment4_9higher_part1/diversity_results/%s/" % (dataset)):
-                os.makedirs("results/experiment4_9higher_part1/diversity_results/%s/" % (dataset))
+            filename = "results/experiment1_9higher_part1/diversity_results/%s/%s.csv" % (dataset, clf_name)
+            if not os.path.exists("results/experiment1_9higher_part1/diversity_results/%s/" % (dataset)):
+                os.makedirs("results/experiment1_9higher_part1/diversity_results/%s/" % (dataset))
             np.savetxt(fname=filename, fmt="%f", X=diversity[clf_id, :, :])
 
         end = time.time() - start
         logging.info("DONE - %s (Time: %d [s])" % (dataset, end))
+        print("ERROR: %s" % (dataset))
 
     except Exception as ex:
         logging.exception("Exception in %s" % (dataset))
