@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from sklearn.base import BaseEstimator, clone
 from sklearn.metrics import accuracy_score
@@ -46,7 +47,6 @@ class MooEnsembleSVC(BaseEstimator):
         crossover = MixedVariableCrossover(mask, {
             "real": get_crossover("real_sbx"),
             # "real": get_crossover("real_two_point"),
-            # sprawdzić różną crossover do real
             "binary": get_crossover("bin_two_point")
         })
         mutation = MixedVariableMutation(mask, {
@@ -69,6 +69,7 @@ class MooEnsembleSVC(BaseEstimator):
                        algorithm,
                        ('n_eval', 1000),
                        # sprawdź n_gen 100 lub 1000
+                       # ('n_gen', 100),
                        seed=1,
                        verbose=False,
                        save_history=True)

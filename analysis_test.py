@@ -7,9 +7,10 @@ from sklearn.svm import SVC
 from methods.moo_ensemble import MooEnsembleSVC
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
 from utils.load_dataset import find_datasets
+from utils.plots import scatter_pareto_chart
 
 
-DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datasets/9higher_part1')
+DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datasets/test')
 n_datasets = len(list(enumerate(find_datasets(DATASETS_DIR))))
 
 base_estimator = {'SVM': SVC(probability=True)}
@@ -89,4 +90,7 @@ def horizontal_bar_chart():
 
 
 # Plotting bar chart
-horizontal_bar_chart()
+# horizontal_bar_chart()
+
+# Plot pareto front scatter
+scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_test")

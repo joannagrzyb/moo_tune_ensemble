@@ -39,6 +39,8 @@ DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datase
 metrics = [sl.metrics.balanced_accuracy_score, sl.metrics.geometric_mean_score_1, sl.metrics.geometric_mean_score_2, sl.metrics.f1_score, sl.metrics.recall, sl.metrics.specificity, sl.metrics.precision]
 metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "Precision"]
 
+n_rows_p = 100
+
 logging.basicConfig(filename='experiment1_9higher_part1.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
 logging.info("--------------------------------------------------------------------------------")
 logging.info("-------                        NEW EXPERIMENT                            -------")
@@ -61,6 +63,7 @@ def compute(dataset_id, dataset):
 
         scores = np.zeros((len(metrics), len(methods), n_folds))
         diversity = np.zeros((len(methods), n_folds, 4))
+        pareto_solutions = np.zeros((n_folds, n_rows_p, 2))
 
         for fold_id, (train, test) in enumerate(rskf.split(X, y)):
             X_train, X_test = X[train], X[test]
@@ -76,6 +79,11 @@ def compute(dataset_id, dataset):
                     diversity[clf_id, fold_id] = clf.calculate_diversity()
                 else:
                     diversity[clf_id, fold_id] = None
+
+                if hasattr(clf, 'solutions'):
+                    for sol_id, solution in enumerate(clf.solutions):
+                        for s_id, s in enumerate(solution):
+                            pareto_solutions[fold_id, sol_id, s_id] = s
         # Save results to csv
         for clf_id, clf_name in enumerate(methods):
             for metric_id, metric in enumerate(metrics_alias):
@@ -89,6 +97,14 @@ def compute(dataset_id, dataset):
             if not os.path.exists("results/experiment1_9higher_part1/diversity_results/%s/" % (dataset)):
                 os.makedirs("results/experiment1_9higher_part1/diversity_results/%s/" % (dataset))
             np.savetxt(fname=filename, fmt="%f", X=diversity[clf_id, :, :])
+        # Save results pareto_solutions to csv
+        for fold_id in range(n_folds):
+            for sol_id in range(n_rows_p):
+                if (pareto_solutions[fold_id, sol_id, 0] != 0.0) and (pareto_solutions[fold_id, sol_id, 1] != 0.0):
+                    filename_pareto = "results/experiment1_9higher_part1/pareto_raw/%s/fold%d/sol%d.csv" % (dataset, fold_id, sol_id)
+                    if not os.path.exists("results/experiment1_9higher_part1/pareto_raw/%s/fold%d/" % (dataset, fold_id)):
+                        os.makedirs("results/experiment1_9higher_part1/pareto_raw/%s/fold%d/" % (dataset, fold_id))
+                    np.savetxt(fname=filename_pareto, fmt="%f", X=pareto_solutions[fold_id, sol_id, :])
 
         end = time.time() - start
         logging.info("DONE - %s (Time: %d [s])" % (dataset, end))

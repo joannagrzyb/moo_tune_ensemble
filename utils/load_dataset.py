@@ -4,8 +4,7 @@ import os
 from sklearn.preprocessing import OrdinalEncoder, LabelEncoder
 
 
-# DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datasets/9higher_part1')
-DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datasets/1_5_9')
+DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datasets/test')
 
 
 def load_data(filename):
@@ -33,7 +32,6 @@ def load_data(filename):
         # Enocoding class names into binary
         class_encoder = LabelEncoder()
         labels = class_encoder.fit_transform(labels)
-
         classes = np.unique(labels)
 
         return features, labels, classes

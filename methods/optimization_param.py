@@ -4,7 +4,7 @@ import autograd.numpy as anp
 from sklearn.model_selection import train_test_split
 from sklearn.base import clone
 from pymoo.model.problem import Problem
-
+from sklearn import metrics as mt
 
 class OptimizationParam(Problem):
     def __init__(self, X, y, test_size, estimator, scale_features, n_features, n_param=2, objectives=2, random_state=0, feature_names=None):
@@ -16,11 +16,15 @@ class OptimizationParam(Problem):
         self.scale_features = scale_features
         self.n_features = n_features
 
-        # If test size is not specify or it is 0, everything is took to test and train
+        # print(X.shape)
+
+        self.X = X
+        self.y = y
+
         if self.test_size != 0:
-            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=self.test_size, random_state=random_state)
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=self.test_size, stratify=self.y)
         else:
-            self.X_train, self.X_test, self.y_train, self.y_test = np.copy(X), np.copy(y), np.copy(X), np.copy(y)
+            self.X_train, self.X_test, self.y_train, self.y_test = np.copy(self.X), np.copy(self.y), np.copy(self.X), np.copy(self.y)
 
         # Lower and upper bounds for x - 1d array with length equal to number of variable
         xl_real = [1E6, 1E-7]
@@ -36,6 +40,7 @@ class OptimizationParam(Problem):
 
     # x: a two dimensional matrix where each row is a point to evaluate and each column a variable
     def validation(self, x):
+
         C = x[0]
         gamma = x[1]
         selected_features = x[2:]
@@ -43,6 +48,7 @@ class OptimizationParam(Problem):
 
         # If at least one element in x are True
         if True in selected_features:
+            clf = None
             clf = clone(self.estimator.set_params(C=C, gamma=gamma))
             clf.fit(self.X_train[:, selected_features], self.y_train)
             y_pred = clf.predict(self.X_test[:, selected_features])
@@ -53,6 +59,7 @@ class OptimizationParam(Problem):
 
     def _evaluate(self, x, out, *args, **kwargs):
         scores = self.validation(x)
+        # print(scores)
 
         # Function F is always minimize, but the minus sign (-) before F means maximize
         f1 = -1 * scores[0]
