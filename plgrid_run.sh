@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH -N 1
-#SBATCH --ntasks-per-node=1
+#SBATCH --ntasks-per-node=34
 #SBATCH --time=72:00:00
 #SBATCH -A plgjoannagrzyb2021a
 
