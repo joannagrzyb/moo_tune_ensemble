@@ -4,7 +4,7 @@ import autograd.numpy as anp
 from sklearn.model_selection import train_test_split
 from sklearn.base import clone
 from pymoo.model.problem import Problem
-from sklearn import metrics as mt
+
 
 class OptimizationParam(Problem):
     def __init__(self, X, y, test_size, estimator, scale_features, n_features, n_param=2, objectives=2, random_state=0, feature_names=None):
@@ -16,11 +16,8 @@ class OptimizationParam(Problem):
         self.scale_features = scale_features
         self.n_features = n_features
 
-        # print(X.shape)
-
         self.X = X
         self.y = y
-
         if self.test_size != 0:
             self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=self.test_size, stratify=self.y)
         else:
@@ -40,7 +37,6 @@ class OptimizationParam(Problem):
 
     # x: a two dimensional matrix where each row is a point to evaluate and each column a variable
     def validation(self, x):
-
         C = x[0]
         gamma = x[1]
         selected_features = x[2:]

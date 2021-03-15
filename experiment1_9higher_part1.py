@@ -11,15 +11,21 @@ from sklearn.svm import SVC
 from sklearn.model_selection import RepeatedStratifiedKFold
 from sklearn.base import clone
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.feature_selection import chi2
 
 from utils.load_dataset import load_data, find_datasets
 from methods.moo_ensemble import MooEnsembleSVC
+from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
+from methods.feature_selection_clf import FeatueSelectionClf
 
 base_estimator = SVC(probability=True)
 methods = {
     "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
+    "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
     "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
+    "SVM": SVC(),
+    "FS": FeatueSelectionClf(base_estimator, chi2),
 }
 
 # Repeated Stratified K-Fold cross validator
@@ -68,6 +74,12 @@ def compute(dataset_id, dataset):
         for fold_id, (train, test) in enumerate(rskf.split(X, y)):
             X_train, X_test = X[train], X[test]
             y_train, y_test = y[train], y[test]
+
+            IR = {}
+            for class_num in set(y_train):
+                IR[class_num] = np.sum(y_train == class_num)
+            methods["FSIRSVM"] = FeatueSelectionClf(SVC(kernel='linear', class_weight=IR), chi2)
+
             for clf_id, clf_name in enumerate(methods):
                 clf = clone(methods[clf_name])
                 clf.fit(X_train, y_train)
@@ -108,7 +120,7 @@ def compute(dataset_id, dataset):
 
         end = time.time() - start
         logging.info("DONE - %s (Time: %d [s])" % (dataset, end))
-        print("ERROR: %s" % (dataset))
+        print("DONE - %s (Time: %d [s])" % (dataset, end))
 
     except Exception as ex:
         logging.exception("Exception in %s" % (dataset))

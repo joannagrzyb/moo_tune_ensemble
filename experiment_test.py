@@ -8,24 +8,25 @@ from sklearn.svm import SVC
 from sklearn.model_selection import RepeatedStratifiedKFold
 from sklearn.base import clone
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.feature_selection import chi2
 
 from utils.load_dataset import load_data, find_datasets
 from methods.moo_ensemble import MooEnsembleSVC
 from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
+from methods.feature_selection_clf import FeatueSelectionClf
 
 warnings.filterwarnings("ignore")
 start = time.time()
 
 base_estimator = SVC(probability=True)
-# base_estimator = SVC(probability=True, C=462719002.79299235, gamma=4.217184146722036e-06)
 
 methods = {
-    # "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
+    "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
     "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
     "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
     "SVM": SVC(),
-    "SVMFS": 
+    "FS": FeatueSelectionClf(base_estimator, chi2),
 }
 
 # Repeated Stratified K-Fold cross validator
@@ -63,6 +64,12 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
     for fold_id, (train, test) in enumerate(rskf.split(X, y)):
         X_train, X_test = X[train], X[test]
         y_train, y_test = y[train], y[test]
+
+        IR = {}
+        for class_num in set(y_train):
+            IR[class_num] = np.sum(y_train == class_num)
+        methods["FSIRSVM"] = FeatueSelectionClf(SVC(kernel='linear', class_weight=IR), chi2)
+
         for clf_id, clf_name in enumerate(methods):
             print(f"Fold number: {fold_id}, clf: {clf_name}")
             clf = clone(methods[clf_name])

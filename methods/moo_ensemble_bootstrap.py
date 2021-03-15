@@ -1,12 +1,10 @@
 import numpy as np
 import random
 from random import randint
-import strlearn as sl
 from sklearn.base import BaseEstimator, clone
 from sklearn.metrics import accuracy_score
 from scipy.stats import mode
 from torch import cdist, from_numpy
-import matplotlib.pyplot as plt
 
 from pymoo.algorithms.nsga2 import NSGA2
 from pymoo.optimize import minimize
@@ -60,7 +58,6 @@ class MooEnsembleSVCbootstrap(BaseEstimator):
         })
 
         # Bootstraping - GUMP
-        # print("BOOTSTRAPPING")
         self.roots = []
         # Distances n_samples x n_samples
         # p - parameter Minkowski distance, if p=2 Euclidean distance, if p=1 Manhattan distance, if 0<p<1 it's better for more dimenesions
@@ -79,10 +76,8 @@ class MooEnsembleSVCbootstrap(BaseEstimator):
                 bs_indx = np.random.choice(indxs, size=int(self.X.shape[0]), replace=True, p=n2)
                 bs_X = self.X[bs_indx, :]
                 bs_y = self.y[bs_indx]
-                # print(bs_y)
 
                 minority_samples = sum(1 for i in bs_y if i == 1)
-                # print("Number of minority_samples:", minority_samples)
                 min_indexes = np.where(y == 1)
                 min_indexes = min_indexes[0]
                 if minority_samples == 0:
@@ -92,14 +87,12 @@ class MooEnsembleSVCbootstrap(BaseEstimator):
                     min_indx_b = random.choice(min_indexes)
                     bs_y[maj_indx_a] = y[min_indx_a]
                     bs_y[maj_indx_b] = y[min_indx_b]
-                    # print("nowe bs_y0:", bs_y)
                 elif minority_samples == 1:
                     maj_indexes = np.where(bs_y == 0)
                     maj_indexes = maj_indexes[0]
                     maj_indx = random.choice(maj_indexes)
                     min_indx = random.choice(min_indexes)
                     bs_y[maj_indx] = y[min_indx]
-                    # print("nowe bs_y", bs_y)
 
                 # Create optimization problem
                 problem = OptimizationParam(bs_X, bs_y, test_size=self.test_size, estimator=self.base_classifier, scale_features=self.scale_features, n_features=n_features, objectives=self.objectives)
@@ -139,10 +132,8 @@ class MooEnsembleSVCbootstrap(BaseEstimator):
                 bs_indx = np.random.choice(indxs, size=int(self.X.shape[0]), replace=True, p=n2)
                 bs_X = self.X[bs_indx, :]
                 bs_y = self.y[bs_indx]
-                # print("kolejny model:", bs_y)
 
                 minority_samples = sum(1 for i in bs_y if i == 1)
-                # print("Number of minority_samples:", minority_samples)
                 min_indexes = np.where(y == 1)
                 min_indexes = min_indexes[0]
                 if minority_samples == 0:
@@ -152,14 +143,12 @@ class MooEnsembleSVCbootstrap(BaseEstimator):
                     min_indx_b = random.choice(min_indexes)
                     bs_y[maj_indx_a] = y[min_indx_a]
                     bs_y[maj_indx_b] = y[min_indx_b]
-                    # print("nowe bs_y0:", bs_y)
                 elif minority_samples == 1:
                     maj_indexes = np.where(bs_y == 0)
                     maj_indexes = maj_indexes[0]
                     maj_indx = random.choice(maj_indexes)
                     min_indx = random.choice(min_indexes)
                     bs_y[maj_indx] = y[min_indx]
-                    # print("nowe bs_y", bs_y)
 
                 # Create optimization problem
                 problem = OptimizationParam(bs_X, bs_y, test_size=self.test_size, estimator=self.base_classifier, scale_features=self.scale_features, n_features=n_features, objectives=self.objectives)
@@ -189,9 +178,6 @@ class MooEnsembleSVCbootstrap(BaseEstimator):
                     candidate = clone(self.base_classifier).fit(X[:, sf], y)
                     # Add candidate to the ensemble
                     self.ensemble.append(candidate)
-
-                # print(self.solutions, len(self.ensemble))
-        # print("FINAL number of models in ensemble:", len(self.ensemble))
 
         return self
 

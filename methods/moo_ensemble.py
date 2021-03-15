@@ -1,4 +1,3 @@
-import os
 import numpy as np
 from sklearn.base import BaseEstimator, clone
 from sklearn.metrics import accuracy_score

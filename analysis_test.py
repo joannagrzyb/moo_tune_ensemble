@@ -3,9 +3,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.svm import SVC
+from sklearn.feature_selection import chi2
 
 from methods.moo_ensemble import MooEnsembleSVC
+from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
+from methods.feature_selection_clf import FeatueSelectionClf
 from utils.load_dataset import find_datasets
 from utils.plots import scatter_pareto_chart
 
@@ -14,15 +17,25 @@ DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datase
 n_datasets = len(list(enumerate(find_datasets(DATASETS_DIR))))
 
 base_estimator = {'SVM': SVC(probability=True)}
+# IR is an example, not real values of datasets
+IR = {0: 1, 1: 1}
 
 methods = {
     "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
+    "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
     "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
+    "SVM": SVC(),
+    "FS": FeatueSelectionClf(base_estimator, chi2),
+    "FSIRSVM": FeatueSelectionClf(SVC(kernel='linear', class_weight=IR), chi2)
 }
 
 methods_alias = [
-                "MooEnsembleSVC",
-                "RandomSubspace"
+                "SEMOOS",
+                "MooEnsembleSVCbootstrap",
+                "RandomSubspace",
+                "SVM",
+                "FS",
+                "FSIRSVM"
                 ]
 
 metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "Precision"]
@@ -39,10 +52,11 @@ stds = np.zeros((n_datasets, n_metrics, n_methods))
 datasets = []
 for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
     datasets.append(dataset)
+
     for clf_id, clf_name in enumerate(methods):
         for metric_id, metric in enumerate(metrics_alias):
             try:
-                filename = "results/experiment_server/experiment1_9higher_part1/raw_results/%s/%s/%s.csv" % (metric, dataset, clf_name)
+                filename = "results/experiment_test/raw_results/%s/%s/%s.csv" % (metric, dataset, clf_name)
                 scores = np.genfromtxt(filename, delimiter=',', dtype=np.float32)
                 mean_score = np.mean(scores)
                 mean_scores[dataset_id, metric_id, clf_id] = mean_score
@@ -80,9 +94,9 @@ def horizontal_bar_chart():
         plt.grid(True, color="silver", linestyle=":", axis='both', which='both')
         plt.gcf().set_size_inches(6, 12)
         # Save plot
-        filename = "results/experiment_server/experiment1_9higher_part1/plot_bar/bar_%s" % (metric)
-        if not os.path.exists("results/experiment_server/experiment1_9higher_part1/plot_bar/"):
-            os.makedirs("results/experiment_server/experiment1_9higher_part1/plot_bar/")
+        filename = "results/experiment_test/plot_bar/bar_%s" % (metric)
+        if not os.path.exists("results/experiment_test/plot_bar/"):
+            os.makedirs("results/experiment_test/plot_bar/")
         plt.savefig(filename+".png", bbox_inches='tight')
         plt.savefig(filename+".eps", format='eps', bbox_inches='tight')
         plt.clf()
@@ -90,7 +104,7 @@ def horizontal_bar_chart():
 
 
 # Plotting bar chart
-# horizontal_bar_chart()
+horizontal_bar_chart()
 
 # Plot pareto front scatter
 scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_test")
