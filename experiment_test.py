@@ -27,6 +27,7 @@ methods = {
     "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
     "SVM": SVC(),
     "FS": FeatueSelectionClf(base_estimator, chi2),
+    "FSIRSVM": 0
 }
 
 # Repeated Stratified K-Fold cross validator

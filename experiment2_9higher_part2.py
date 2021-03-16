@@ -26,6 +26,7 @@ methods = {
     "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
     "SVM": SVC(),
     "FS": FeatueSelectionClf(base_estimator, chi2),
+    "FSIRSVM": 0
 }
 
 # Repeated Stratified K-Fold cross validator
@@ -47,14 +48,14 @@ metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "
 
 n_rows_p = 100
 
-logging.basicConfig(filename='experiment2_9higher_part2.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
+logging.basicConfig(filename='logs/experiment2_9higher_part2.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
 logging.info("--------------------------------------------------------------------------------")
 logging.info("-------                        NEW EXPERIMENT                            -------")
 logging.info("--------------------------------------------------------------------------------")
 
 
 def compute(dataset_id, dataset):
-    logging.basicConfig(filename='experiment2_9higher_part2.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
+    logging.basicConfig(filename='logs/experiment2_9higher_part2.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
     try:
         warnings.filterwarnings("ignore")
         print("START: %s" % (dataset))
