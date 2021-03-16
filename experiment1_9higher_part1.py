@@ -48,13 +48,13 @@ metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "
 
 n_rows_p = 100
 
-logging.basicConfig(filename='devlogs/experiment1_9higher_part1.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
+logging.basicConfig(filename='textinfo/experiment1_9higher_part1.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
 logging.info("--------------------------------------------------------------------------------")
 logging.info("-------                        NEW EXPERIMENT                            -------")
 logging.info("--------------------------------------------------------------------------------")
 
 def compute(dataset_id, dataset):
-    logging.basicConfig(filename='devlogs/experiment1_9higher_part1.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
+    logging.basicConfig(filename='textinfo/experiment1_9higher_part1.log', filemode="a", format='%(asctime)s - %(levelname)s: %(message)s', level='DEBUG')
     try:
         warnings.filterwarnings("ignore")
         print("START: %s" % (dataset))
