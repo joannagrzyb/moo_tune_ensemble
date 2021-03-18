@@ -2,6 +2,7 @@
 #PBS -q plgrid
 #PBS -l walltime=6:00:00
 #PBS -l select=1:ncpus=2:mem=2048MB
+#PBS -A plgjoannagrzyb2021a
 
 # wejscie do katalogu, z ktorego zostalo wstawione zadania
 cd $PBS_O_WORKDIR
