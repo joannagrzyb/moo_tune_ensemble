@@ -8,6 +8,7 @@
 cd $PBS_O_WORKDIR
 
 # instalowanie potrzebnych bibliotek
+module add /usr/local/Modules/python/3.6.8-gcc7.3.0
 pip3 install -r requirements.txt --user
 pip3 install -U stream-learn
 
