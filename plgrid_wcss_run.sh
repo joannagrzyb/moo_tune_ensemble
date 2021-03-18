@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -q main
+#PBS -q plgrid
 #PBS -l walltime=6:00:00
 #PBS -l select=1:ncpus=2:mem=2048MB
 
