@@ -5,7 +5,7 @@
 #PBS -A plgjoannagrzyb2021a
 
 # wejscie do katalogu, z ktorego zostalo wstawione zadania
-cd $PBS_O_WORKDIR
+# cd $PBS_O_WORKDIR
 ls
 
 # instalowanie potrzebnych bibliotek
