@@ -6,6 +6,7 @@
 
 # wejscie do katalogu, z ktorego zostalo wstawione zadania
 cd $PBS_O_WORKDIR
+ls
 
 # instalowanie potrzebnych bibliotek
 module add /usr/local/Modules/python/3.6.8-gcc7.3.0
