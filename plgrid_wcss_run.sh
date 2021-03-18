@@ -14,4 +14,4 @@ pip install -U stream-learn
 
 # uruchom program
 # z PRZEKIEROWANIEM ZAPISYWANIA WYNIKOW -- BARDZO WAZNE
-python3 experiment1_9higher_part1 > wynik.txt
+python3 experiment1_9higher_part1.py > wynik.txt
