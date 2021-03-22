@@ -3,9 +3,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.svm import SVC
+from sklearn.feature_selection import chi2
 
 from methods.moo_ensemble import MooEnsembleSVC
+from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
+from methods.feature_selection_clf import FeatueSelectionClf
 from utils.load_dataset import find_datasets
 from utils.plots import scatter_pareto_chart
 
@@ -17,12 +20,20 @@ base_estimator = {'SVM': SVC(probability=True)}
 
 methods = {
     "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
+    "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
     "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
+    "SVM": SVC(),
+    "FS": FeatueSelectionClf(base_estimator, chi2),
+    "FSIRSVM": 0
 }
 
 methods_alias = [
                 "MooEnsembleSVC",
-                "RandomSubspace"
+                "MooEnsembleSVCbootstrap",
+                "RandomSubspace",
+                "SVM",
+                "FS",
+                "FSIRSVM"
                 ]
 
 metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "Precision"]
@@ -93,4 +104,4 @@ def horizontal_bar_chart():
 horizontal_bar_chart()
 
 # Plot pareto front scatter
-scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_test")
+scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_server/experiment3_9higher_part3")
