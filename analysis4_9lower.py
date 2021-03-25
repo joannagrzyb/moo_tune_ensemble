@@ -28,9 +28,9 @@ methods = {
 }
 
 methods_alias = [
-                "MooEnsembleSVC",
-                "MooEnsembleSVCbootstrap",
-                "RandomSubspace",
+                "SEMOOS",
+                "SEMOOSb",
+                "RS",
                 "SVM",
                 "FS",
                 "FSIRSVM"
@@ -89,9 +89,9 @@ def horizontal_bar_chart():
         plt.title(f"Metric: {metric}")
         plt.legend(loc='best')
         plt.grid(True, color="silver", linestyle=":", axis='both', which='both')
-        plt.gcf().set_size_inches(6, 12)
+        plt.gcf().set_size_inches(9, 14)
         # Save plot
-        filename = "results/experiment_server/experiment4_9lower/plot_bar/bar_%s" % (metric)
+        filename = "results/experiment_server/experiment4_9lower/plot_bar/ex4_bar_%s" % (metric)
         if not os.path.exists("results/experiment_server/experiment4_9lower/plot_bar/"):
             os.makedirs("results/experiment_server/experiment4_9lower/plot_bar/")
         plt.savefig(filename+".png", bbox_inches='tight')
@@ -104,4 +104,4 @@ def horizontal_bar_chart():
 horizontal_bar_chart()
 
 # Plot pareto front scatter
-scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_server/experiment4_9lower")
+# scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_server/experiment4_9lower")

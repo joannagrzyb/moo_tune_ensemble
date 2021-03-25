@@ -28,9 +28,9 @@ methods = {
 }
 
 methods_alias = [
-                "MooEnsembleSVC",
-                "MooEnsembleSVCbootstrap",
-                "RandomSubspace",
+                "SEMOOS",
+                "SEMOOSb",
+                "RS",
                 "SVM",
                 "FS",
                 "FSIRSVM"
@@ -82,16 +82,17 @@ def horizontal_bar_chart():
         print(df)
         df = df.sort_index()
 
-        ax = df.plot.barh(xerr=stds_data)
+        ax = df.plot.barh(xerr=stds_data, ecolor="black")
+        # ax = df.plot.barh()
         ax.invert_yaxis()
         plt.ylabel("Datasets")
         plt.xlabel("Score")
         plt.title(f"Metric: {metric}")
         plt.legend(loc='best')
         plt.grid(True, color="silver", linestyle=":", axis='both', which='both')
-        plt.gcf().set_size_inches(6, 12)
+        plt.gcf().set_size_inches(9, 14)
         # Save plot
-        filename = "results/experiment_server/experiment1_9higher_part1/plot_bar/bar_%s" % (metric)
+        filename = "results/experiment_server/experiment1_9higher_part1/plot_bar/ex1_bar_%s" % (metric)
         if not os.path.exists("results/experiment_server/experiment1_9higher_part1/plot_bar/"):
             os.makedirs("results/experiment_server/experiment1_9higher_part1/plot_bar/")
         plt.savefig(filename+".png", bbox_inches='tight')
@@ -104,4 +105,4 @@ def horizontal_bar_chart():
 horizontal_bar_chart()
 
 # Plot pareto front scatter
-scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_server/experiment1_9higher_part1")
+# scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_server/experiment1_9higher_part1")
