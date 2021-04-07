@@ -11,6 +11,7 @@ from methods.random_subspace_ensemble import RandomSubspaceEnsemble
 from methods.feature_selection_clf import FeatueSelectionClf
 from utils.load_dataset import find_datasets
 from utils.plots import scatter_pareto_chart
+from utils.wilcoxon_ranking import pairs_metrics_multi
 
 
 DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datasets/9higher_part1')
@@ -43,6 +44,7 @@ n_repeats = 5
 n_folds = n_splits * n_repeats
 n_methods = len(methods_alias) * len(base_estimator)
 n_metrics = len(metrics_alias)
+data_np = np.zeros((n_datasets, n_metrics, n_methods, n_folds))
 mean_scores = np.zeros((n_datasets, n_metrics, n_methods))
 stds = np.zeros((n_datasets, n_metrics, n_methods))
 
@@ -55,6 +57,7 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
             try:
                 filename = "results/experiment_server/experiment1_9higher_part1/raw_results/%s/%s/%s.csv" % (metric, dataset, clf_name)
                 scores = np.genfromtxt(filename, delimiter=',', dtype=np.float32)
+                data_np[dataset_id, metric_id, clf_id] = scores
                 mean_score = np.mean(scores)
                 mean_scores[dataset_id, metric_id, clf_id] = mean_score
                 std = np.std(scores)
@@ -63,7 +66,7 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
             except:
                 print("Error loading data!")
 
-
+# print(data_np)
 # Plotting
 # Bar chart function
 def horizontal_bar_chart():
@@ -102,7 +105,12 @@ def horizontal_bar_chart():
 
 
 # Plotting bar chart
-horizontal_bar_chart()
+# horizontal_bar_chart()
 
 # Plot pareto front scatter
 # scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_server/experiment1_9higher_part1")
+
+# Wilcoxon ranking - statistic test for methods: SEMOOS and SEMOOSb
+pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment1_9higher_part1", dataset_names=datasets, metrics=metrics_alias, filename="ex1_ranking_plot", ref_method=methods_alias[0])
+
+pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment1_9higher_part1", dataset_names=datasets, metrics=metrics_alias, filename="ex1_ranking_plot", ref_method=methods_alias[1])

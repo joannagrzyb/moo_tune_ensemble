@@ -29,6 +29,7 @@ def load_data(filename):
         features[categorical_id] = encoder.fit_transform(features[categorical_id])
 
         labels = df.iloc[:, -1].values.astype(str)
+        classes = np.unique(labels)
         # Enocoding class names into binary
         class_encoder = LabelEncoder()
         labels = class_encoder.fit_transform(labels)
