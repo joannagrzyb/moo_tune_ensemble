@@ -1,21 +1,22 @@
 import os
 import numpy as np
-import warnings
+import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.svm import SVC
 from sklearn.feature_selection import chi2
+
 from methods.moo_ensemble import MooEnsembleSVC
 from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
 from methods.feature_selection_clf import FeatueSelectionClf
-from utils.load_dataset import find_datasets, calc_imbalance_ratio
+from utils.load_dataset import find_datasets
+from utils.plots import scatter_pareto_chart
+from utils.wilcoxon_ranking import pairs_metrics_multi
 
 
-warnings.filterwarnings("ignore")
-
+# DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datasets/9higher_part1')
 
 base_estimator = {'SVM': SVC(probability=True)}
-# IR is an example, not real values of datasets
-IR_class = {0: 1, 1: 1}
 
 methods = {
     "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
@@ -23,7 +24,7 @@ methods = {
     "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
     "SVM": SVC(),
     "FS": FeatueSelectionClf(base_estimator, chi2),
-    "FSIRSVM": FeatueSelectionClf(SVC(kernel='linear', class_weight=IR_class), chi2)
+    "FSIRSVM": 0
 }
 
 methods_alias = [
@@ -43,53 +44,37 @@ n_folds = n_splits * n_repeats
 n_methods = len(methods_alias) * len(base_estimator)
 n_metrics = len(metrics_alias)
 
-directories = ["9lower", "9higher_part1", "9higher_part2", "9higher_part3"]
-
+# Load data from file
 n_datasets = 0
 datasets = []
+directories = ["9higher_part1", "9higher_part2", "9higher_part3"]
 for dir_id, dir in enumerate(directories):
     DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), '/home/joannagrzyb/dev/moo_tune_ensemble/datasets/%s/' % dir)
     n_datasets += len(list(enumerate(find_datasets(DATASETS_DIR))))
     for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
         datasets.append(dataset)
 
+data_np = np.zeros((n_datasets, n_metrics, n_methods, n_folds))
 mean_scores = np.zeros((n_datasets, n_metrics, n_methods))
 stds = np.zeros((n_datasets, n_metrics, n_methods))
-experiments_paths = ["experiment4_9lower", "experiment1_9higher_part1", "experiment2_9higher_part2", "experiment3_9higher_part3"]
-for exp in experiments_paths:
+
+for dir_id, dir in enumerate(directories):
+    dir_id += 1
     for dataset_id, dataset in enumerate(datasets):
         for clf_id, clf_name in enumerate(methods):
             for metric_id, metric in enumerate(metrics_alias):
                 try:
-                    filename = "results/experiment_server/%s/raw_results/%s/%s/%s.csv" % (exp, metric, dataset, clf_name)
+                    filename = "results/experiment_server/experiment%d_%s/raw_results/%s/%s/%s.csv" % (dir_id, dir, metric, dataset, clf_name)
                     if not os.path.isfile(filename):
                         # print("File not exist - %s" % filename)
                         continue
                     scores = np.genfromtxt(filename, delimiter=',', dtype=np.float32)
-                    mean_score = np.mean(scores)
-                    mean_scores[dataset_id, metric_id, clf_id] = mean_score
-                    std = np.std(scores)
-                    stds[dataset_id, metric_id, clf_id] = std
+                    data_np[dataset_id, metric_id, clf_id] = scores
                 except:
                     print("Error loading dataset - %s!" % dataset)
 
-IR = calc_imbalance_ratio(directories=directories)
-IR_argsorted = np.argsort(IR)
 
-# Save dataset name, mean scores and standard deviation to .tex file
-for metric_id, metric in enumerate(metrics_alias):
-    with open("results/tables/results_%s.tex" % metric, "w+") as file:
-        for id, arg in enumerate(IR_argsorted):
-            id += 1
-            dataset_name = datasets[arg].replace("_", "\\_")
-            print("%d & \\emph{%s} & %0.2f $\\pm$ %0.2f & %0.2f $\\pm$ %0.2f & %0.2f $\\pm$ %0.2f & %0.2f $\\pm$ %0.2f & %0.2f $\\pm$ %0.2f & %0.2f $\\pm$ %0.2f \\\\" % (
-                id, dataset_name,
-                mean_scores[arg, metric_id, 0], stds[arg, metric_id, 0],
-                mean_scores[arg, metric_id, 1], stds[arg, metric_id, 1],
-                mean_scores[arg, metric_id, 2], stds[arg, metric_id, 2],
-                mean_scores[arg, metric_id, 3], stds[arg, metric_id, 3],
-                mean_scores[arg, metric_id, 4], stds[arg, metric_id, 4],
-                mean_scores[arg, metric_id, 5], stds[arg, metric_id, 5]
-                ), file=file)
-            if IR[arg] > 8.6 and IR[arg] < 9.0:
-                print("\\hline", file=file)
+# Wilcoxon ranking - statistic test for methods: SEMOOS and SEMOOSb
+pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment_9higher", dataset_names=datasets, metrics=metrics_alias, filename="ex9h_ranking_plot", ref_method=methods_alias[0])
+
+pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment_9higher", dataset_names=datasets, metrics=metrics_alias, filename="ex9h_ranking_plot", ref_method=methods_alias[1])
