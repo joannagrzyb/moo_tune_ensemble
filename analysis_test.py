@@ -7,6 +7,7 @@ from sklearn.feature_selection import chi2
 
 from methods.moo_ensemble import MooEnsembleSVC
 from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
+from methods.moo_ensemble_bootstrap_moead import MooEnsembleSVCbootstrapMOEAD
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
 from methods.feature_selection_clf import FeatueSelectionClf
 from utils.load_dataset import find_datasets
@@ -24,6 +25,7 @@ IR = {0: 1, 1: 1}
 methods = {
     "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
     "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
+    "MooEnsembleSVCbootstrapMOEAD": MooEnsembleSVCbootstrapMOEAD(base_classifier=base_estimator),
     "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
     "SVM": SVC(),
     "FS": FeatueSelectionClf(base_estimator, chi2),
@@ -33,6 +35,7 @@ methods = {
 methods_alias = [
                 "SEMOOS",
                 "SEMOOSb",
+                "SEMOOSbMOEAD",
                 "RS",
                 "SVM",
                 "FS",
@@ -59,6 +62,7 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
         for metric_id, metric in enumerate(metrics_alias):
             try:
                 filename = "results/experiment_test/raw_results/%s/%s/%s.csv" % (metric, dataset, clf_name)
+                # print(filename)
                 scores = np.genfromtxt(filename, delimiter=',', dtype=np.float32)
                 data_np[dataset_id, metric_id, clf_id] = scores
                 mean_score = np.mean(scores)
@@ -69,7 +73,7 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
             except:
                 print("Error loading data!")
 
-# print(mean_scores)
+print(mean_scores)
 # Plotting
 # Bar chart function
 def horizontal_bar_chart():
@@ -107,13 +111,13 @@ def horizontal_bar_chart():
 
 
 # Plotting bar chart
-# horizontal_bar_chart()
+horizontal_bar_chart()
 
 # Plot pareto front scatter
 # scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_test")
 
 
 # Wilcoxon ranking - statistic test for methods: SEMOOS and SEMOOSb
-pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_test", dataset_names=datasets, metrics=metrics_alias, filename="ex_ranking_plot", ref_method=methods_alias[0])
-
-pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_test", dataset_names=datasets, metrics=metrics_alias, filename="ex_ranking_plot", ref_method=methods_alias[1])
+# pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_test", dataset_names=datasets, metrics=metrics_alias, filename="ex_ranking_plot", ref_method=methods_alias[0])
+#
+# pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_test", dataset_names=datasets, metrics=metrics_alias, filename="ex_ranking_plot", ref_method=methods_alias[1])

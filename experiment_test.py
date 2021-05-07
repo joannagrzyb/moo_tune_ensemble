@@ -13,6 +13,7 @@ from sklearn.feature_selection import chi2
 from utils.load_dataset import load_data, find_datasets
 from methods.moo_ensemble import MooEnsembleSVC
 from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
+from methods.moo_ensemble_bootstrap_moead import MooEnsembleSVCbootstrapMOEAD
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
 from methods.feature_selection_clf import FeatueSelectionClf
 
@@ -21,12 +22,14 @@ start = time.time()
 
 base_estimator = SVC(probability=True)
 
+# MooEnsembleSVCbootstrapMOEAD - it is not used in this research
 methods = {
-    "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
-    "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
-    "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
-    "SVM": SVC(),
-    "FS": FeatueSelectionClf(base_estimator, chi2),
+    # "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
+    # "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
+    "MooEnsembleSVCbootstrapMOEAD": MooEnsembleSVCbootstrapMOEAD(base_classifier=base_estimator),
+    # "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
+    # "SVM": SVC(),
+    # "FS": FeatueSelectionClf(base_estimator, chi2),
     "FSIRSVM": 0
 }
 
@@ -86,10 +89,16 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
                 diversity[clf_id, fold_id] = None
             print(diversity[clf_id, fold_id])
 
+            # Gdy jest Bootstraping, to tylko ostatnia jego iteracja jest zapisywana jako pareto_solutions
             if hasattr(clf, 'solutions'):
-                for sol_id, solution in enumerate(clf.solutions):
-                    for s_id, s in enumerate(solution):
-                        pareto_solutions[fold_id, sol_id, s_id] = s
+                if clf.solutions is None:
+                    for sol_id in range(n_rows_p):
+                        pareto_solutions[fold_id, sol_id, 0] = 0.0
+                        pareto_solutions[fold_id, sol_id, 1] = 0.0
+                else:
+                    for sol_id, solution in enumerate(clf.solutions):
+                        for s_id, s in enumerate(solution):
+                            pareto_solutions[fold_id, sol_id, s_id] = s
     print(scores)
     # Save results to csv
     for clf_id, clf_name in enumerate(methods):
