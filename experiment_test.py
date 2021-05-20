@@ -13,7 +13,6 @@ from sklearn.feature_selection import chi2
 from utils.load_dataset import load_data, find_datasets
 from methods.moo_ensemble import MooEnsembleSVC
 from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
-from methods.moo_ensemble_bootstrap_moead import MooEnsembleSVCbootstrapMOEAD
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
 from methods.feature_selection_clf import FeatueSelectionClf
 
@@ -22,11 +21,9 @@ start = time.time()
 
 base_estimator = SVC(probability=True)
 
-# MooEnsembleSVCbootstrapMOEAD - it is not used in this research
 methods = {
     # "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
-    # "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
-    "MooEnsembleSVCbootstrapMOEAD": MooEnsembleSVCbootstrapMOEAD(base_classifier=base_estimator),
+    "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
     # "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
     # "SVM": SVC(),
     # "FS": FeatueSelectionClf(base_estimator, chi2),

@@ -7,7 +7,6 @@ from sklearn.feature_selection import chi2
 
 from methods.moo_ensemble import MooEnsembleSVC
 from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
-from methods.moo_ensemble_bootstrap_moead import MooEnsembleSVCbootstrapMOEAD
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
 from methods.feature_selection_clf import FeatueSelectionClf
 from utils.load_dataset import find_datasets
@@ -25,7 +24,6 @@ IR = {0: 1, 1: 1}
 methods = {
     "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
     "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
-    "MooEnsembleSVCbootstrapMOEAD": MooEnsembleSVCbootstrapMOEAD(base_classifier=base_estimator),
     "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
     "SVM": SVC(),
     "FS": FeatueSelectionClf(base_estimator, chi2),
@@ -35,7 +33,6 @@ methods = {
 methods_alias = [
                 "SEMOOS",
                 "SEMOOSb",
-                "SEMOOSbMOEAD",
                 "RS",
                 "SVM",
                 "FS",
