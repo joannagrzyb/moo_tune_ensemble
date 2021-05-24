@@ -1,17 +1,10 @@
 import os
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.svm import SVC
-from sklearn.feature_selection import chi2
 
-from methods.moo_ensemble import MooEnsembleSVC
 from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
-from methods.random_subspace_ensemble import RandomSubspaceEnsemble
-from methods.feature_selection_clf import FeatueSelectionClf
 from utils.load_dataset import find_datasets
-from utils.plots import scatter_pareto_chart
-from utils.wilcoxon_ranking import pairs_metrics_multi
 
 
 DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datasets/set_params')
@@ -37,15 +30,6 @@ methods = {
     "MooEnsembleSVCbootstrap_ce10_me20": MooEnsembleSVCbootstrap(base_classifier=base_estimator, etac=10, etam=20),
     "MooEnsembleSVCbootstrap_ce20_me20": MooEnsembleSVCbootstrap(base_classifier=base_estimator, etac=20, etam=20),
     }
-
-# methods_alias = [
-#                 "SEMOOSb",
-#                 "SEMOOSb",
-#                 "RS",
-#                 "SVM",
-#                 "FS",
-#                 "FSIRSVM"
-#                 ]
 
 metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "Precision"]
 
