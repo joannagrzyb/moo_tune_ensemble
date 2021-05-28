@@ -130,7 +130,7 @@ metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "
 n_rows_p = 100
 
 # Multithread; n_jobs - number of threads, where -1 all threads, safe for my computer 2
-Parallel(n_jobs=1)(
+Parallel(n_jobs=-1)(
                 delayed(compute)
                 (dataset_id, dataset, methods, n_folds, metrics, metrics_alias, n_rows_p)
                 for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR))
