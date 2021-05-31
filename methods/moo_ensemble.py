@@ -14,7 +14,7 @@ from utils.diversity import calc_diversity_measures, calc_diversity_measures2
 
 class MooEnsembleSVC(BaseEstimator):
 
-    def __init__(self, base_classifier, scale_features=0.5, n_classifiers=10, test_size=0.5, objectives=2, p_size=100, predict_decision="ASV", p_minkowski=2):
+    def __init__(self, base_classifier, scale_features=0.75, n_classifiers=10, test_size=0.5, objectives=2, p_size=100, predict_decision="ASV", p_minkowski=2, mutation_real="real_pm", mutation_bin="bin_bitflip", crossover_real="real_sbx", crossover_bin="bin_two_point", etac=2, etam=5):
 
         self.base_classifier = base_classifier
         self.n_classifiers = n_classifiers
@@ -26,6 +26,12 @@ class MooEnsembleSVC(BaseEstimator):
         self.selected_features = []
         self.predict_decision = predict_decision
         self.p_minkowski = p_minkowski
+        self.mutation_real = mutation_real
+        self.mutation_bin = mutation_bin
+        self.crossover_real = crossover_real
+        self.crossover_bin = crossover_bin
+        self.etac = etac
+        self.etam = etam
 
     def partial_fit(self, X, y, classes=None):
         self.X, self.y = X, y
@@ -44,13 +50,12 @@ class MooEnsembleSVC(BaseEstimator):
             "binary": get_sampling("bin_random")
         })
         crossover = MixedVariableCrossover(mask, {
-            "real": get_crossover("real_sbx"),
-            # "real": get_crossover("real_two_point"),
-            "binary": get_crossover("bin_two_point")
+            "real": get_crossover(self.crossover_real, eta=self.etac),
+            "binary": get_crossover(self.crossover_bin)
         })
         mutation = MixedVariableMutation(mask, {
-            "real": get_mutation("real_pm"),
-            "binary": get_mutation("bin_bitflip")
+            "real": get_mutation(self.mutation_real, eta=self.etam),
+            "binary": get_mutation(self.mutation_bin)
         })
 
         # Create optimization problem
@@ -67,8 +72,6 @@ class MooEnsembleSVC(BaseEstimator):
                        problem,
                        algorithm,
                        ('n_eval', 1000),
-                       # sprawdź n_gen 100 lub 1000
-                       # ('n_gen', 100),
                        seed=1,
                        verbose=False,
                        save_history=True)
@@ -77,8 +80,6 @@ class MooEnsembleSVC(BaseEstimator):
         self.solutions = res.F
 
         # X returns values of hyperparameter C, gamma and binary vector of selected features
-        # print("X", res.X)
-        # print("F", self.solutions)
         for result_opt in res.X:
             self.base_classifier = self.base_classifier.set_params(C=result_opt[0], gamma=result_opt[1])
             sf = result_opt[2:].tolist()
