@@ -17,7 +17,7 @@ from utils.diversity import calc_diversity_measures, calc_diversity_measures2
 
 class MooEnsembleSVCbootstrap(BaseEstimator):
 
-    def __init__(self, base_classifier, scale_features=0.75, n_repeats=5, test_size=0.5, objectives=2, p_size=100, predict_decision="ASV", p_minkowski=2, mutation_real="real_pm", mutation_bin="bin_bitflip", crossover_real="real_sbx", crossover_bin="bin_two_point", etac=2, etam=5):
+    def __init__(self, base_classifier, scale_features=0.5, n_repeats=5, test_size=0.5, objectives=2, p_size=100, predict_decision="ASV", p_minkowski=2, mutation_real="real_pm", mutation_bin="bin_bitflip", crossover_real="real_sbx", crossover_bin="bin_two_point", etac=2, etam=5):
 
         self.base_classifier = base_classifier
         self.n_repeats = n_repeats

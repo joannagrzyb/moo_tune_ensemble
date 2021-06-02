@@ -7,6 +7,7 @@ from sklearn.feature_selection import chi2
 
 from methods.moo_ensemble import MooEnsembleSVC
 from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
+from methods.moo_ensemble_bootstrap_pruned import MooEnsembleSVCbootstrapPruned
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
 from methods.feature_selection_clf import FeatueSelectionClf
 from utils.load_dataset import find_datasets
@@ -24,15 +25,18 @@ IR = {0: 1, 1: 1}
 methods = {
     "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
     "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
+    "MooEnsembleSVCbootstrapPruned": MooEnsembleSVCbootstrapPruned(base_classifier=base_estimator),
     "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
     "SVM": SVC(),
     "FS": FeatueSelectionClf(base_estimator, chi2),
-    "FSIRSVM": FeatueSelectionClf(SVC(kernel='linear', class_weight=IR), chi2)
+    "FSIRSVM": 0
 }
+
 
 methods_alias = [
                 "SEMOOS",
                 "SEMOOSb",
+                "SEMOOSbp",
                 "RS",
                 "SVM",
                 "FS",
@@ -71,6 +75,8 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
                 print("Error loading data!")
 
 print(mean_scores)
+
+
 # Plotting
 # Bar chart function
 def horizontal_bar_chart():
@@ -111,7 +117,7 @@ def horizontal_bar_chart():
 horizontal_bar_chart()
 
 # Plot pareto front scatter
-# scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_test")
+# scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_test", methods=methods)
 
 
 # Wilcoxon ranking - statistic test for methods: SEMOOS and SEMOOSb

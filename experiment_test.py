@@ -13,6 +13,7 @@ from sklearn.feature_selection import chi2
 from utils.load_dataset import load_data, find_datasets
 from methods.moo_ensemble import MooEnsembleSVC
 from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
+from methods.moo_ensemble_bootstrap_pruned import MooEnsembleSVCbootstrapPruned
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
 from methods.feature_selection_clf import FeatueSelectionClf
 
@@ -22,11 +23,12 @@ start = time.time()
 base_estimator = SVC(probability=True)
 
 methods = {
-    # "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
+    "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
     "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
-    # "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
-    # "SVM": SVC(),
-    # "FS": FeatueSelectionClf(base_estimator, chi2),
+    "MooEnsembleSVCbootstrapPruned": MooEnsembleSVCbootstrapPruned(base_classifier=base_estimator),
+    "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
+    "SVM": SVC(),
+    "FS": FeatueSelectionClf(base_estimator, chi2),
     "FSIRSVM": 0
 }
 
@@ -47,7 +49,7 @@ DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datase
 metrics = [sl.metrics.balanced_accuracy_score, sl.metrics.geometric_mean_score_1, sl.metrics.geometric_mean_score_2, sl.metrics.f1_score, sl.metrics.recall, sl.metrics.specificity, sl.metrics.precision]
 metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "Precision"]
 
-n_rows_p = 100
+n_rows_p = 1000
 
 for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
     start_ds = time.time()
@@ -60,7 +62,7 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
 
     scores = np.zeros((len(metrics), len(methods), n_folds))
     diversity = np.zeros((len(methods), n_folds, 4))
-    pareto_solutions = np.zeros((n_folds, n_rows_p, 2))
+    pareto_solutions = np.zeros((len(methods), n_folds, n_rows_p, 2))
 
     for fold_id, (train, test) in enumerate(rskf.split(X, y)):
         X_train, X_test = X[train], X[test]
@@ -86,16 +88,19 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
                 diversity[clf_id, fold_id] = None
             print(diversity[clf_id, fold_id])
 
-            # Gdy jest Bootstraping, to tylko ostatnia jego iteracja jest zapisywana jako pareto_solutions
             if hasattr(clf, 'solutions'):
+                # print(clf.solutions)
                 if clf.solutions is None:
                     for sol_id in range(n_rows_p):
-                        pareto_solutions[fold_id, sol_id, 0] = 0.0
-                        pareto_solutions[fold_id, sol_id, 1] = 0.0
+                        pareto_solutions[clf_id, fold_id, sol_id, 0] = 0.0
+                        pareto_solutions[clf_id, fold_id, sol_id, 1] = 0.0
                 else:
                     for sol_id, solution in enumerate(clf.solutions):
+                        # print("sols:", solution)
+                        # pareto_solutions[clf_id, fold_id, sol_id] = solution
                         for s_id, s in enumerate(solution):
-                            pareto_solutions[fold_id, sol_id, s_id] = s
+                            pareto_solutions[clf_id, fold_id, sol_id, s_id] = s
+
     print(scores)
     # Save results to csv
     for clf_id, clf_name in enumerate(methods):
@@ -112,13 +117,14 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
         np.savetxt(fname=filename, fmt="%f", X=diversity[clf_id, :, :])
 
     # Save results pareto_solutions to csv
-    for fold_id in range(n_folds):
-        for sol_id in range(n_rows_p):
-            if (pareto_solutions[fold_id, sol_id, 0] != 0.0) and (pareto_solutions[fold_id, sol_id, 1] != 0.0):
-                filename_pareto = "results/experiment_test/pareto_raw/%s/fold%d/sol%d.csv" % (dataset, fold_id, sol_id)
-                if not os.path.exists("results/experiment_test/pareto_raw/%s/fold%d/" % (dataset, fold_id)):
-                    os.makedirs("results/experiment_test/pareto_raw/%s/fold%d/" % (dataset, fold_id))
-                np.savetxt(fname=filename_pareto, fmt="%f", X=pareto_solutions[fold_id, sol_id, :])
+    for clf_id, clf_name in enumerate(methods):
+        for fold_id in range(n_folds):
+            for sol_id in range(n_rows_p):
+                if (pareto_solutions[clf_id, fold_id, sol_id, 0] != 0.0) and (pareto_solutions[clf_id, fold_id, sol_id, 1] != 0.0):
+                    filename_pareto = "results/experiment_test/pareto_raw/%s/%s/fold%d/sol%d.csv" % (dataset, clf_name, fold_id, sol_id)
+                    if not os.path.exists("results/experiment_test/pareto_raw/%s/%s/fold%d/" % (dataset, clf_name, fold_id)):
+                        os.makedirs("results/experiment_test/pareto_raw/%s/%s/fold%d/" % (dataset, clf_name, fold_id))
+                    np.savetxt(fname=filename_pareto, fmt="%f", X=pareto_solutions[clf_id, fold_id, sol_id, :])
 
     end_ds = time.time()
     print("TIME: %.0f sec" % (end_ds - start_ds))

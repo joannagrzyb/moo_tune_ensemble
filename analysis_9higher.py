@@ -14,8 +14,6 @@ from utils.plots import scatter_pareto_chart
 from utils.wilcoxon_ranking import pairs_metrics_multi
 
 
-# DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datasets/9higher_part1')
-
 base_estimator = {'SVM': SVC(probability=True)}
 
 methods = {
