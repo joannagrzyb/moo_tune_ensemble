@@ -56,27 +56,18 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
                 mean_scores_fold[dataset_id, metric_id, clf_id] = mean_score
                 std = np.std(scores)
                 stds[dataset_id, metric_id, clf_id] = std
-                print(dataset, clf_name, metric, mean_score, std)
+                # print(dataset, clf_name, metric, mean_score, std)
             except:
                 print("Error loading data!")
 
-
 mean_scores_ds = np.mean(mean_scores_fold, axis=0)
-print(mean_scores_ds)
-
 etas = [2, 5, 10, 20]
 
-print(methods.keys())
-keys = np.array(list(methods.keys()))
-print(keys)
-new = np.reshape(keys, (4,4))
-print(new)
 
-
-def save_grid_results(param_1, param_2, metrics_array, metrics_alias):
+def save_grid_results(param_1, param_2, metrics_array, dataset_name, metrics_alias):
     for metric_id, metric in enumerate(metrics_alias):
 
-        filename = ("%s_%s_" % (param_1, param_2)) + metric
+        filename = ("%s_%s_%s_" % (dataset_name, param_1, param_2)) + metric
         filepath = "results/experiment0_set_crossmut/grid/values/%s" % filename
 
         if not os.path.exists("results/experiment0_set_crossmut/grid/values/"):
@@ -89,22 +80,22 @@ def save_grid_results(param_1, param_2, metrics_array, metrics_alias):
                    fmt="%0.3f")
 
 
-def plot_grid_results(param_1, param_2, metrics_array, metrics_alias, etas):
+def plot_grid_results(param_1, param_2, metrics_array, dataset_name, metrics_alias, etas):
     for metric_id, metric in enumerate(metrics_alias):
 
-        fig, ax = plt.subplots(figsize=(4, 4))
+        fig, ax = plt.subplots(figsize=(3, 3))
         mean = np.mean(metrics_array[metric_id, :, :])
         max = np.max(metrics_array[metric_id, :, :])
         ax.imshow(metrics_array[metric_id, :, :], cmap='Greys')
         plt.xlabel(param_1)
         plt.ylabel(param_2)
+        plt.title(metric)
 
-        # labels = np.around(np.arange(0, 1.1, resolution), 1)
         labels = etas
         ax.set_xticks(np.arange(len(labels)))
         ax.set_yticks(np.arange(len(labels)))
         ax.set_xticklabels(labels)
-        ax.set_yticklabels(labels)
+        ax.set_yticklabels(labels[::-1])
         for i in range(len(labels)):
             for j in range(len(labels)):
                 if metrics_array[metric_id, i, j] > mean:
@@ -132,7 +123,7 @@ def plot_grid_results(param_1, param_2, metrics_array, metrics_alias, etas):
         if not os.path.exists("results/experiment0_set_crossmut/grid/plots/"):
             os.makedirs("results/experiment0_set_crossmut/grid/plots/")
 
-        filename = ("%s_%s_" % (param_1, param_2)) + metric
+        filename = ("%s_%s_%s_" % (dataset_name, param_1, param_2)) + metric
 
         plt.tight_layout()
         plt.savefig("results/experiment0_set_crossmut/grid/plots/%s.png" % filename)
@@ -149,11 +140,28 @@ def plot_grid_results(param_1, param_2, metrics_array, metrics_alias, etas):
                    fmt="%0.3f")
 
 
+# Average resuls dor 4 datasets
 metrics_array = np.zeros((len(metrics_alias), len(etas), len(etas)))
 for metric_id, metric in enumerate(metrics_alias):
     metrics_array[metric_id] = np.reshape(mean_scores_ds[metric_id, :], (4, 4))
 
-print(metrics_array)
-save_grid_results("Eta_c", "Eta_m", metrics_array, metrics_alias)
+metrics_array_r = np.flip(metrics_array, 1)
+print(metrics_array_r)
+save_grid_results("Eta_c", "Eta_m", metrics_array_r, "avg", metrics_alias)
 
-plot_grid_results("Eta_c", "Eta_m", metrics_array, metrics_alias, etas)
+plot_grid_results("Eta_c", "Eta_m", metrics_array_r, "avg", metrics_alias, etas)
+
+# Results for each dataset
+data_array = np.zeros((len(datasets), len(metrics_alias), len(etas), len(etas)))
+for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
+    for metric_id, metric in enumerate(metrics_alias):
+        data_array[dataset_id, metric_id] = np.reshape(mean_scores_fold[dataset_id, metric_id, :], (len(etas), len(etas)))
+
+data_array_r = np.flip(data_array, 2)
+# print(data_array)
+print(data_array_r)
+
+for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
+    save_grid_results("Eta_c", "Eta_m", data_array_r[dataset_id], dataset, metrics_alias)
+
+    plot_grid_results("Eta_c", "Eta_m", data_array_r[dataset_id], dataset, metrics_alias, etas)

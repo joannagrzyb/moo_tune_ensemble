@@ -86,20 +86,20 @@ def save_grid_results(param_1, param_2, metrics_array, dataset_name, metrics_ali
 def plot_grid_results(param_1, param_2, metrics_array, dataset_name, metrics_alias, bootstraps, features_percent):
     for metric_id, metric in enumerate(metrics_alias):
 
-        fig, ax = plt.subplots(figsize=(4, 4))
+        fig, ax = plt.subplots(figsize=(3, 3))
         mean = np.mean(metrics_array[metric_id, :, :])
         max = np.max(metrics_array[metric_id, :, :])
         ax.imshow(metrics_array[metric_id, :, :], cmap='Greys')
         plt.xlabel(param_2)
         plt.ylabel(param_1)
+        plt.title(metric)
 
-        # labels = np.around(np.arange(0, 1.1, resolution), 1)
         labels_x = features_percent
         labels_y = bootstraps
         ax.set_xticks(np.arange(len(labels_x)))
         ax.set_yticks(np.arange(len(labels_y)))
         ax.set_xticklabels(labels_x)
-        ax.set_yticklabels(labels_y)
+        ax.set_yticklabels(labels_y[::-1])
         for i in range(len(labels_x)):
             for j in range(len(labels_y)):
                 if metrics_array[metric_id, i, j] > mean:
@@ -143,23 +143,29 @@ def plot_grid_results(param_1, param_2, metrics_array, dataset_name, metrics_ali
                    delimiter=";",
                    fmt="%0.3f")
 
-
+# Average resuls dor 4 datasets
 metrics_array = np.zeros((len(metrics_alias), len(bootstraps), len(features_percent)))
 for metric_id, metric in enumerate(metrics_alias):
     metrics_array[metric_id] = np.reshape(mean_scores_ds[metric_id, :], (len(bootstraps), len(features_percent)))
 
 # print(metrics_array)
-# save_grid_results("Bootstraps", "Features", metrics_array, metrics_alias)
-#
-# plot_grid_results("Bootstraps", "Features", metrics_array, metrics_alias, bootstraps, features_percent)
+metrics_array_r = np.flip(metrics_array, 1)
+# print(metrics_array_r)
+save_grid_results("Bootstraps", "Features", metrics_array_r, "avg", metrics_alias)
 
+plot_grid_results("Bootstraps", "Features", metrics_array_r, "avg", metrics_alias, bootstraps, features_percent)
 
+# Results for each dataset
 data_array = np.zeros((len(datasets), len(metrics_alias), len(bootstraps), len(features_percent)))
 for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
     for metric_id, metric in enumerate(metrics_alias):
         data_array[dataset_id, metric_id] = np.reshape(mean_scores_fold[dataset_id, metric_id, :], (len(bootstraps), len(features_percent)))
 
-for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
-    save_grid_results("Bootstraps", "Features", data_array[dataset_id], dataset, metrics_alias)
+data_array_r = np.flip(data_array, 2)
+# print(data_array)
+print(data_array_r)
 
-    plot_grid_results("Bootstraps", "Features", data_array[dataset_id], dataset, metrics_alias, bootstraps, features_percent)
+for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
+    save_grid_results("Bootstraps", "Features", data_array_r[dataset_id], dataset, metrics_alias)
+
+    plot_grid_results("Bootstraps", "Features", data_array_r[dataset_id], dataset, metrics_alias, bootstraps, features_percent)
