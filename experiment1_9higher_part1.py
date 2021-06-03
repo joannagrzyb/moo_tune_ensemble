@@ -134,7 +134,7 @@ def compute(dataset_id, dataset):
 
 
 # Multithread; n_jobs - number of threads, where -1 all threads, safe for my computer 2
-Parallel(n_jobs=1)(
+Parallel(n_jobs=-1)(
                 delayed(compute)
                 (dataset_id, dataset)
                 for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR))
