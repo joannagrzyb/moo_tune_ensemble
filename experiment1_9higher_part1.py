@@ -116,7 +116,7 @@ def compute(dataset_id, dataset):
         for clf_id, clf_name in enumerate(methods):
             for fold_id in range(n_folds):
                 for sol_id in range(n_rows_p):
-                    if (pareto_solutions[fold_id, sol_id, 0] != 0.0) and (pareto_solutions[fold_id, sol_id, 1] != 0.0):
+                    if (pareto_solutions[clf_id, fold_id, sol_id, 0] != 0.0) and (pareto_solutions[clf_id, fold_id, sol_id, 1] != 0.0):
                         filename_pareto = "results/experiment1_9higher_part1/pareto_raw/%s/%s/fold%d/sol%d.csv" % (dataset, clf_name, fold_id, sol_id)
                         if not os.path.exists("results/experiment1_9higher_part1/pareto_raw/%s/%s/fold%d/" % (dataset, clf_name, fold_id)):
                             os.makedirs("results/experiment1_9higher_part1/pareto_raw/%s/%s/fold%d/" % (dataset, clf_name, fold_id))
@@ -134,7 +134,7 @@ def compute(dataset_id, dataset):
 
 
 # Multithread; n_jobs - number of threads, where -1 all threads, safe for my computer 2
-Parallel(n_jobs=-1)(
+Parallel(n_jobs=1)(
                 delayed(compute)
                 (dataset_id, dataset)
                 for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR))
