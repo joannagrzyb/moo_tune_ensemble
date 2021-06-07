@@ -123,6 +123,7 @@ class MooEnsembleSVCbootstrapPruned(BaseEstimator):
                 unique_solutions, unique_indexes = np.unique(self.solutions_bs, return_index=True, axis=0)
                 self.solutions = unique_solutions
 
+                # Pruning based on unique solutions of precision and recall from pareto front
                 if np.shape(unique_indexes)[0] == 1:
                     self.base_classifier = self.base_classifier.set_params(C=res.X[0, 0], gamma=res.X[0, 1])
                     sf = res.X[0, 2:].tolist()
@@ -189,6 +190,7 @@ class MooEnsembleSVCbootstrapPruned(BaseEstimator):
                 unique_solutions, unique_indexes = np.unique(self.solutions_bs, return_index=True, axis=0)
                 self.solutions = np.append(self.solutions, unique_solutions, axis=0)
 
+                # Pruning based on unique solutions of precision and recall from pareto front
                 if np.shape(unique_indexes)[0] == 1:
                     self.base_classifier = self.base_classifier.set_params(C=res.X[0, 0], gamma=res.X[0, 1])
                     sf = res.X[0, 2:].tolist()

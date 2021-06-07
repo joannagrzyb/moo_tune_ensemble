@@ -7,6 +7,7 @@ from sklearn.feature_selection import chi2
 
 from methods.moo_ensemble import MooEnsembleSVC
 from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
+from methods.moo_ensemble_bootstrap_pruned import MooEnsembleSVCbootstrapPruned
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
 from methods.feature_selection_clf import FeatueSelectionClf
 from utils.load_dataset import find_datasets
@@ -18,23 +19,24 @@ DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datase
 n_datasets = len(list(enumerate(find_datasets(DATASETS_DIR))))
 
 base_estimator = {'SVM': SVC(probability=True)}
-
 methods = {
     "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
     "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
-    "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
-    "SVM": SVC(),
-    "FS": FeatueSelectionClf(base_estimator, chi2),
-    "FSIRSVM": 0
+    "MooEnsembleSVCbootstrapPruned": MooEnsembleSVCbootstrapPruned(base_classifier=base_estimator),
+    # "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
+    # "SVM": SVC(),
+    # "FS": FeatueSelectionClf(base_estimator, chi2),
+    # "F
 }
 
 methods_alias = [
                 "SEMOOS",
                 "SEMOOSb",
-                "RS",
-                "SVM",
-                "FS",
-                "FSIRSVM"
+                "SEMOOSbp",
+                # "RS",
+                # "SVM",
+                # "FS",
+                # "FSIRSVM"
                 ]
 
 metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "Precision"]
@@ -62,7 +64,7 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
                 mean_scores[dataset_id, metric_id, clf_id] = mean_score
                 std = np.std(scores)
                 stds[dataset_id, metric_id, clf_id] = std
-                print(dataset, clf_name, metric, mean_score, std)
+                # print(dataset, clf_name, metric, mean_score, std)
             except:
                 print("Error loading data!")
 
@@ -81,6 +83,8 @@ def horizontal_bar_chart():
                 stds_errors.append(stds[dataset_id, metric_id, clf_id])
             data[clf_name] = plot_data
             stds_data[clf_name] = stds_errors
+        # print(len(plot_data))
+        # print(data)
         df = pd.DataFrame(data, columns=methods_alias, index=datasets)
         print(df)
         df = df.sort_index()
@@ -92,9 +96,9 @@ def horizontal_bar_chart():
         plt.title(f"Metric: {metric}")
         plt.legend(loc='best')
         plt.grid(True, color="silver", linestyle=":", axis='both', which='both')
-        plt.gcf().set_size_inches(9, 14)
+        plt.gcf().set_size_inches(8, 30)
         # Save plot
-        filename = "results/experiment_server/experiment4_9lower/plot_bar/ex4_bar_%s" % (metric)
+        filename = "results/experiment_server/experiment4_9lower/plot_bar/bar_%s" % (metric)
         if not os.path.exists("results/experiment_server/experiment4_9lower/plot_bar/"):
             os.makedirs("results/experiment_server/experiment4_9lower/plot_bar/")
         plt.savefig(filename+".png", bbox_inches='tight')
@@ -104,12 +108,12 @@ def horizontal_bar_chart():
 
 
 # Plotting bar chart
-# horizontal_bar_chart()
+horizontal_bar_chart()
 
 # Plot pareto front scatter
 # scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_server/experiment4_9lower")
 
 # Wilcoxon ranking - statistic test for methods: SEMOOS and SEMOOSb
-pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[0])
-
-pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[1])
+# pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[0])
+#
+# pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[1])
