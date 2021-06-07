@@ -114,6 +114,9 @@ horizontal_bar_chart()
 # scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_server/experiment4_9lower")
 
 # Wilcoxon ranking - statistic test for methods: SEMOOS and SEMOOSb
-# pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[0])
-#
-# pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[1])
+pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[0])
+
+pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[1])
+
+
+pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[2])
