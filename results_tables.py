@@ -5,6 +5,7 @@ from sklearn.svm import SVC
 from sklearn.feature_selection import chi2
 from methods.moo_ensemble import MooEnsembleSVC
 from methods.moo_ensemble_bootstrap import MooEnsembleSVCbootstrap
+from methods.moo_ensemble_bootstrap_pruned import MooEnsembleSVCbootstrapPruned
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
 from methods.feature_selection_clf import FeatueSelectionClf
 from utils.load_dataset import find_datasets, calc_imbalance_ratio
@@ -20,15 +21,18 @@ IR_class = {0: 1, 1: 1}
 methods = {
     "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
     "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
+    "MooEnsembleSVCbootstrapPruned": MooEnsembleSVCbootstrapPruned(base_classifier=base_estimator),
     "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
     "SVM": SVC(),
     "FS": FeatueSelectionClf(base_estimator, chi2),
     "FSIRSVM": FeatueSelectionClf(SVC(kernel='linear', class_weight=IR_class), chi2)
+
 }
 
 methods_alias = [
                 "SEMOOS",
                 "SEMOOSb",
+                "SEMOOSbp",
                 "RS",
                 "SVM",
                 "FS",
@@ -81,15 +85,16 @@ for metric_id, metric in enumerate(metrics_alias):
     with open("results/tables/results_%s.tex" % metric, "w+") as file:
         for id, arg in enumerate(IR_argsorted):
             id += 1
-            dataset_name = datasets[arg].replace("_", "\\_")
-            print("%d & \\emph{%s} & %0.2f $\\pm$ %0.2f & %0.2f $\\pm$ %0.2f & %0.2f $\\pm$ %0.2f & %0.2f $\\pm$ %0.2f & %0.2f $\\pm$ %0.2f & %0.2f $\\pm$ %0.2f \\\\" % (
-                id, dataset_name,
-                mean_scores[arg, metric_id, 0], stds[arg, metric_id, 0],
-                mean_scores[arg, metric_id, 1], stds[arg, metric_id, 1],
-                mean_scores[arg, metric_id, 2], stds[arg, metric_id, 2],
-                mean_scores[arg, metric_id, 3], stds[arg, metric_id, 3],
-                mean_scores[arg, metric_id, 4], stds[arg, metric_id, 4],
-                mean_scores[arg, metric_id, 5], stds[arg, metric_id, 5]
-                ), file=file)
+            line = "%d" % (id)
+            line_values = []
+            line_values = mean_scores[arg, metric_id, :]
+            max_value = np.amax(line_values)
+            for clf_id, clf_name in enumerate(methods):
+                if mean_scores[arg, metric_id, clf_id] == max_value:
+                    line += " & \\textbf{%0.3f $\\pm$ %0.3f}" % (mean_scores[arg, metric_id, clf_id], stds[arg, metric_id, clf_id])
+                else:
+                    line += " & %0.3f $\\pm$ %0.3f" % (mean_scores[arg, metric_id, clf_id], stds[arg, metric_id, clf_id])
+            line += " \\\\"
+            print(line, file=file)
             if IR[arg] > 8.6 and IR[arg] < 9.0:
                 print("\\hline", file=file)
