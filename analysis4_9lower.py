@@ -13,6 +13,8 @@ from methods.feature_selection_clf import FeatueSelectionClf
 from utils.load_dataset import find_datasets
 from utils.plots import scatter_pareto_chart
 from utils.wilcoxon_ranking import pairs_metrics_multi
+from utils.wilcoxon_ranking_grid import pairs_metrics_multi_grid
+from utils.wilcoxon_ranking_grid_all import pairs_metrics_multi_grid_all
 
 
 DATASETS_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'datasets/9lower')
@@ -23,20 +25,26 @@ methods = {
     "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
     "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
     "MooEnsembleSVCbootstrapPruned": MooEnsembleSVCbootstrapPruned(base_classifier=base_estimator),
-    # "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
-    # "SVM": SVC(),
-    # "FS": FeatueSelectionClf(base_estimator, chi2),
-    # "F
+    "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
+    "SVM": SVC(),
+    "FS": FeatueSelectionClf(base_estimator, chi2),
+    "FSIRSVM": 0
 }
 
 methods_alias = [
                 "SEMOOS",
                 "SEMOOSb",
                 "SEMOOSbp",
-                # "RS",
-                # "SVM",
-                # "FS",
-                # "FSIRSVM"
+                "RS",
+                "SVM",
+                "FS",
+                "FSIRSVM"
+                ]
+
+reference_methods = [
+                "SEMOOS",
+                "SEMOOSb",
+                "SEMOOSbp",
                 ]
 
 metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "Precision"]
@@ -66,7 +74,7 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
                 stds[dataset_id, metric_id, clf_id] = std
                 # print(dataset, clf_name, metric, mean_score, std)
             except:
-                print("Error loading data!")
+                print("Error loading data!", dataset, clf_name, metric)
 
 
 # Plotting
@@ -108,15 +116,21 @@ def horizontal_bar_chart():
 
 
 # Plotting bar chart
-horizontal_bar_chart()
+# horizontal_bar_chart()
 
 # Plot pareto front scatter
 # scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_server/experiment4_9lower")
 
-# Wilcoxon ranking - statistic test for methods: SEMOOS and SEMOOSb
-pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[0])
+# Wilcoxon ranking horizontally- statistic test for methods: SEMOOS
+# pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[0])
+# # SEMOOSb
+# pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[1])
+# # SEMOOSbp
+# pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[2])
 
-pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[1])
+# Wilcoxon ranking grid - statistic test for methods: SEMOOS, SEMOOSb, SEMOOSbp and all metrics
+# UNCOMMENT ONLY methods SEMOOS, SEMOOSb, SEMOOSbp
+# pairs_metrics_multi_grid(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex9l_ranking_plot_grid_variants", ref_methods=methods_alias[0:3], offset=-25)
 
-
-pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[2])
+# Wilcoxon ranking grid - statistic test for all methods vs: SEMOOS, SEMOOSb, SEMOOSbp and all metrics
+pairs_metrics_multi_grid_all(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex9l_ranking_plot_grid_all", ref_methods=methods_alias[0:3], offset=-25)
