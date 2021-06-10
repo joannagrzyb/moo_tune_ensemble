@@ -134,4 +134,4 @@ def horizontal_bar_chart():
 # pairs_metrics_multi_grid(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment_9higher", dataset_names=datasets, metrics=metrics_alias, filename="ex9h_ranking_plot_grid_variants", ref_methods=methods_alias[0:3], offset=-75)
 
 # Wilcoxon ranking grid - statistic test for all methods vs: SEMOOS, SEMOOSb, SEMOOSbp and all metrics
-pairs_metrics_multi_grid_all(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment_9higher", dataset_names=datasets, metrics=metrics_alias, filename="ex9h_ranking_plot_grid_all", ref_methods=methods_alias[0:3], offset=-75)
+# pairs_metrics_multi_grid_all(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment_9higher", dataset_names=datasets, metrics=metrics_alias, filename="ex9h_ranking_plot_grid_all", ref_methods=methods_alias[0:3], offset=-75)
