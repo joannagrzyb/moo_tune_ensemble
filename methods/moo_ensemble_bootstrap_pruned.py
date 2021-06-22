@@ -121,7 +121,8 @@ class MooEnsembleSVCbootstrapPruned(BaseEstimator):
                 self.solutions_bs = res.F
                 # Unique solutions from the pareto front is a way to prune the ensemble
                 unique_solutions, unique_indexes = np.unique(self.solutions_bs, return_index=True, axis=0)
-                self.solutions = unique_solutions
+                # self.solutions = unique_solutions
+                self.solutions = self.solutions_bs
 
                 # Pruning based on unique solutions of precision and recall from pareto front
                 if np.shape(unique_indexes)[0] == 1:
@@ -188,7 +189,8 @@ class MooEnsembleSVCbootstrapPruned(BaseEstimator):
 
                 self.solutions_bs = res.F
                 unique_solutions, unique_indexes = np.unique(self.solutions_bs, return_index=True, axis=0)
-                self.solutions = np.append(self.solutions, unique_solutions, axis=0)
+                self.solutions = self.solutions_bs
+                # self.solutions = np.append(self.solutions, unique_solutions, axis=0)
 
                 # Pruning based on unique solutions of precision and recall from pareto front
                 if np.shape(unique_indexes)[0] == 1:

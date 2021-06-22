@@ -121,7 +121,7 @@ def horizontal_bar_chart():
 # Plot pareto front scatter
 # scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_server/experiment4_9lower", methods=methods, methods_alias=methods_alias)
 # Plot scatter with all methods
-scatter_plot(datasets=datasets, n_folds=n_folds, experiment_name="experiment_server/experiment4_9lower", methods=methods, raw_data=data_np)
+# scatter_plot(datasets=datasets, n_folds=n_folds, experiment_name="experiment_server/experiment4_9lower", methods=methods, raw_data=data_np)
 
 # Wilcoxon ranking horizontally- statistic test for methods: SEMOOS
 # pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[0])

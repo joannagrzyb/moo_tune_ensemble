@@ -126,7 +126,7 @@ def pairs_metrics_multi_grid_all(method_names, data_np, experiment_name, dataset
                     critical_difference, 0, 1, linestyle="--", linewidth=3, color="black")
             else:
                 axes[index_j, index_i].axvline(
-                    critical_difference, 0, 1, linestyle="--", linewidth=3, color="red")
+                    critical_difference, 0, 1, linestyle="--", linewidth=3, color="black")
 
     if not os.path.exists("results/%s/ranking/" % (experiment_name)):
         os.makedirs("results/%s/ranking/" % (experiment_name))

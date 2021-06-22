@@ -22,8 +22,8 @@ from methods.feature_selection_clf import FeatueSelectionClf
 
 base_estimator = SVC(probability=True)
 methods = {
-    "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
-    "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
+    # "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
+    # "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
     "MooEnsembleSVCbootstrapPruned": MooEnsembleSVCbootstrapPruned(base_classifier=base_estimator),
     # "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
     # "SVM": SVC(),
