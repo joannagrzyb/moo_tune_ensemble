@@ -144,6 +144,8 @@ def scatter_plot(datasets, n_folds, experiment_name, methods, raw_data):
                 # plt.title("Objective Space", fontsize=12)
                 plt.xlabel('Precision', fontsize=12)
                 plt.ylabel('Recall', fontsize=12)
+                plt.xlim([0, 1.1])
+                plt.ylim([0, 1.1])
                 plt.legend(loc="best")
                 plt.gcf().set_size_inches(9, 6)
                 plt.savefig(filename_pareto_chart+".png", bbox_inches='tight')
