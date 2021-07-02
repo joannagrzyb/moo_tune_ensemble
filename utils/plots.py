@@ -152,3 +152,23 @@ def scatter_plot(datasets, n_folds, experiment_name, methods, raw_data):
                 plt.savefig(filename_pareto_chart+".eps", format='eps', bbox_inches='tight')
                 plt.clf()
                 plt.close()
+
+
+def diversity_bar_plot(diversity, diversity_measures, methods_ens_alias, experiment_name):
+    for metric_id, metric in enumerate(diversity_measures):
+        fig = plt.figure()
+        ax = fig.add_axes([0, 0, 1, 1])
+        ax.bar(methods_ens_alias, diversity[:, metric_id], width=0.4, color=["#2F3441", "#877669", "#A6B1A2", "#E2B3A9"])
+
+        plt.grid(True, color="silver", linestyle=":", axis='y', which='major')
+        plt.ylabel(f"{metric}", fontsize=14)
+        plt.xlabel("Methods", fontsize=14)
+        plt.gcf().set_size_inches(3, 3)
+        # Save plot
+        filename = "results/experiment_server/%s/diversity_plot/diversity_bar_plot_%s_%s" % (experiment_name, metric, experiment_name)
+        if not os.path.exists("results/experiment_server/%s/diversity_plot/" % (experiment_name)):
+            os.makedirs("results/experiment_server/%s/diversity_plot/" % (experiment_name))
+        plt.savefig(filename+".png", bbox_inches='tight')
+        plt.savefig(filename+".eps", format='eps', bbox_inches='tight')
+        plt.clf()
+        plt.close()

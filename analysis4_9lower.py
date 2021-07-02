@@ -11,7 +11,7 @@ from methods.moo_ensemble_bootstrap_pruned import MooEnsembleSVCbootstrapPruned
 from methods.random_subspace_ensemble import RandomSubspaceEnsemble
 from methods.feature_selection_clf import FeatueSelectionClf
 from utils.load_dataset import find_datasets
-from utils.plots import scatter_pareto_chart, scatter_plot
+from utils.plots import scatter_pareto_chart, scatter_plot, diversity_bar_plot
 from utils.wilcoxon_ranking import pairs_metrics_multi
 from utils.wilcoxon_ranking_grid import pairs_metrics_multi_grid
 from utils.wilcoxon_ranking_grid_all import pairs_metrics_multi_grid_all
@@ -48,6 +48,7 @@ reference_methods = [
                 ]
 
 metrics_alias = ["BAC", "Gmean", "Gmean2", "F1score", "Recall", "Specificity", "Precision"]
+diversity_measures = ["Entropy", "KW", "Disagreement", "Q statistic"]
 
 n_splits = 2
 n_repeats = 5
@@ -57,6 +58,7 @@ n_metrics = len(metrics_alias)
 data_np = np.zeros((n_datasets, n_metrics, n_methods, n_folds))
 mean_scores = np.zeros((n_datasets, n_metrics, n_methods))
 stds = np.zeros((n_datasets, n_metrics, n_methods))
+diversity = np.zeros((n_datasets, 4, n_folds, len(diversity_measures)))
 
 # Load data from file
 datasets = []
@@ -75,6 +77,25 @@ for dataset_id, dataset in enumerate(find_datasets(DATASETS_DIR)):
                 # print(dataset, clf_name, metric, mean_score, std)
             except:
                 print("Error loading data!", dataset, clf_name, metric)
+
+            for div_measure_id, div_measure in enumerate(diversity_measures):
+                try:
+                    filename = "results/experiment_server/experiment4_9lower/diversity_results/%s/%s.csv" % (dataset, clf_name)
+                    if not os.path.isfile(filename):
+                        # print("File not exist - %s" % filename)
+                        continue
+                    diversity_raw = np.genfromtxt(filename, delimiter=' ', dtype=np.float32)
+                    if np.isnan(diversity_raw).all():
+                        pass
+                    else:
+                        diversity_raw = np.nan_to_num(diversity_raw)
+                        diversity[dataset_id, clf_id] = diversity_raw
+                except:
+                    print("Error loading diversity data!", dataset, clf_name, div_measure)
+
+diversity_m = np.mean(diversity, axis=2)
+diversity_mean = np.mean(diversity_m, axis=0)
+print(diversity_mean)
 
 
 # Plotting
@@ -121,7 +142,7 @@ def horizontal_bar_chart():
 # Plot pareto front scatter
 # scatter_pareto_chart(DATASETS_DIR=DATASETS_DIR, n_folds=n_folds, experiment_name="experiment_server/experiment4_9lower", methods=methods, methods_alias=methods_alias)
 # Plot scatter with all methods
-scatter_plot(datasets=datasets, n_folds=n_folds, experiment_name="experiment_server/experiment4_9lower", methods=methods, raw_data=data_np)
+# scatter_plot(datasets=datasets, n_folds=n_folds, experiment_name="experiment_server/experiment4_9lower", methods=methods, raw_data=data_np)
 
 # Wilcoxon ranking horizontally- statistic test for methods: SEMOOS
 # pairs_metrics_multi(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex4_ranking_plot", ref_method=methods_alias[0])
@@ -136,3 +157,6 @@ scatter_plot(datasets=datasets, n_folds=n_folds, experiment_name="experiment_ser
 
 # Wilcoxon ranking grid - statistic test for all methods vs: SEMOOS, SEMOOSb, SEMOOSbp and all metrics
 # pairs_metrics_multi_grid_all(method_names=methods_alias, data_np=data_np, experiment_name="experiment_server/experiment4_9lower", dataset_names=datasets, metrics=metrics_alias, filename="ex9l_ranking_plot_grid_all", ref_methods=methods_alias[0:3], offset=-25)
+
+# Diversity bar Plotting
+diversity_bar_plot(diversity_mean, diversity_measures, methods_alias[:4], experiment_name="experiment4_9lower")
