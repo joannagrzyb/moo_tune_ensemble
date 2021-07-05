@@ -24,11 +24,11 @@ base_estimator = SVC(probability=True)
 methods = {
     # "MooEnsembleSVC": MooEnsembleSVC(base_classifier=base_estimator),
     # "MooEnsembleSVCbootstrap": MooEnsembleSVCbootstrap(base_classifier=base_estimator),
-    "MooEnsembleSVCbootstrapPruned": MooEnsembleSVCbootstrapPruned(base_classifier=base_estimator),
+    # "MooEnsembleSVCbootstrapPruned": MooEnsembleSVCbootstrapPruned(base_classifier=base_estimator),
     # "RandomSubspace": RandomSubspaceEnsemble(base_classifier=base_estimator),
     # "SVM": SVC(),
-    # "FS": FeatueSelectionClf(base_estimator, chi2),
-    # "FSIRSVM": 0
+    "FS": FeatueSelectionClf(base_estimator, chi2),
+    "FSIRSVM": 0
 }
 
 # Repeated Stratified K-Fold cross validator
@@ -77,10 +77,10 @@ def compute(dataset_id, dataset):
             X_train, X_test = X[train], X[test]
             y_train, y_test = y[train], y[test]
 
-            # IR = {}
-            # for class_num in set(y_train):
-            #     IR[class_num] = np.sum(y_train == class_num)
-            # methods["FSIRSVM"] = FeatueSelectionClf(SVC(kernel='linear', class_weight=IR), chi2)
+            IR = {}
+            for class_num in set(y_train):
+                IR[class_num] = np.sum(y_train == class_num)
+            methods["FSIRSVM"] = FeatueSelectionClf(SVC(kernel='linear', class_weight=IR), chi2)
 
             for clf_id, clf_name in enumerate(methods):
                 clf = clone(methods[clf_name])

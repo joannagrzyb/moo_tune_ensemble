@@ -1,6 +1,7 @@
 import numpy as np
 
 
+# This is incorrect, it obtains nagative values, but the correct range should be from 0 to 1
 def entropy_measure_e(ensemble, X, y):
     L = len(ensemble)
     return np.mean(

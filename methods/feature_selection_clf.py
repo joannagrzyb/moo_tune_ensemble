@@ -6,7 +6,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 class FeatueSelectionClf(BaseEstimator, ClassifierMixin):
-    def __init__(self, base_estimator, score_function, scale_features=0.5):
+    def __init__(self, base_estimator, score_function, scale_features=0.75):
         self.base_estimator = base_estimator
         self.score_function = score_function
         self.scale_features = scale_features
